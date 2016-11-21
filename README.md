@@ -24,3 +24,13 @@ import redis.serde.SnappySerdes._
 val got: Future[Option[Int]] =
   saladAPI.get[Int]("test").map(valueOpt => valueOpt.map(_ + 1))
 ```
+
+# SBT
+TODO: Maven repo
+
+## Netty Version Conflict
+If the Netty version conflicts with your application (ie. Play 2.5), add the following inline to `libraryDependencies +=`:
+```
+excludeAll ExclusionRule(organization = "io.netty")
+```
+If this doesn't work, you may need a jar with shaded dependencies.
