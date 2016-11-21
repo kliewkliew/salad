@@ -18,6 +18,16 @@ import redis.serde.Serde
 case class SaladAPI[EK, EV](commands: RedisAsyncCommands[EK, EV]) {
 
   /**
+    * Implicitly convert Future Java types into Future Scala types.
+    * @param in
+    * @return
+    */
+  implicit def FutureJavaBooleanToScalaBoolean(in: Future[java.lang.Boolean]): Future[Boolean] =
+    in.map(_ == true)
+  implicit def FutureJavaLongToScalaBoolean(in: Future[java.lang.Long]): Future[Boolean] =
+    in.map(_ == 1)
+
+  /**
     * Delete a key-value pair.
     * @param key The key to delete.
     * @param keySerde The serde to encode the key.
@@ -28,7 +38,6 @@ case class SaladAPI[EK, EV](commands: RedisAsyncCommands[EK, EV]) {
              (implicit keySerde: Serde[DK,EK])
   : Future[Boolean] =
   commands.del(keySerde.serialize(key)).toScala
-    .map(_ == 1)
 
   /**
     * Set a key's TTL in seconds.
@@ -42,7 +51,6 @@ case class SaladAPI[EK, EV](commands: RedisAsyncCommands[EK, EV]) {
                 (implicit keySerde: Serde[DK,EK])
   : Future[Boolean] =
   commands.expire(keySerde.serialize(key), ex).toScala
-    .map(_ == true)
 
   /**
     * Set a key's TTL in milliseconds.
@@ -56,7 +64,6 @@ case class SaladAPI[EK, EV](commands: RedisAsyncCommands[EK, EV]) {
                  (implicit keySerde: Serde[DK,EK])
   : Future[Boolean] =
   commands.pexpire(keySerde.serialize(key), px).toScala
-    .map(_ == true)
 
   /**
     * Remove the expiry from a key.
@@ -69,7 +76,6 @@ case class SaladAPI[EK, EV](commands: RedisAsyncCommands[EK, EV]) {
                  (implicit keySerde: Serde[DK,EK])
   : Future[Boolean] =
   commands.persist(keySerde.serialize(key)).toScala
-    .map(_ == true)
 
   /**
     * Get a key-value.
@@ -113,7 +119,7 @@ case class SaladAPI[EK, EV](commands: RedisAsyncCommands[EK, EV]) {
     if (xx) args.xx()
 
     commands.set(keySerde.serialize(key), valSerde.serialize(value), args).toScala
-      .map(_ == "OK")// This is necessary to convert java.lang.Boolean to scala.Boolean
+      .map(_ == "OK")
   }
 
   /**
@@ -128,7 +134,6 @@ case class SaladAPI[EK, EV](commands: RedisAsyncCommands[EK, EV]) {
               (implicit keySerde: Serde[DK,EK])
   : Future[Boolean] =
   commands.hdel(keySerde.serialize(key), keySerde.serialize(field)).toScala
-    .map(_ == 1)
 
   /**
     * Get a field-value pair of a hash key.
@@ -162,12 +167,10 @@ case class SaladAPI[EK, EV](commands: RedisAsyncCommands[EK, EV]) {
   def hset[DK,DV](key: DK, field: DK, value: DV,
                   nx: Boolean = false)
                  (implicit keySerde: Serde[DK,EK], valSerde: Serde[DV,EV])
-  : Future[Boolean] = {
+  : Future[Boolean] =
     if (nx)
-      commands.hsetnx(keySerde.serialize(key), keySerde.serialize(field), valSerde.serialize(value))
+      commands.hsetnx(keySerde.serialize(key), keySerde.serialize(field), valSerde.serialize(value)).toScala
     else
-      commands.hset(keySerde.serialize(key), keySerde.serialize(field), valSerde.serialize(value))
-  }.toScala
-    .map(_ == true)// This is necessary to convert java.lang.Boolean to scala.Boolean
+      commands.hset(keySerde.serialize(key), keySerde.serialize(field), valSerde.serialize(value)).toScala
 
 }
