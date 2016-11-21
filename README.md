@@ -16,6 +16,10 @@ val lettuceAPI = client.connect(ByteArrayCodec.INSTANCE).async
 
 ## Instantiate Salad Wrapper
 ```
+val saladAPI = SaladAPI(lettuceAPI)
+```
+or if the unencoded key will always be a string:
+```
 val saladAPI = SaladStringKeyAPI(lettuceAPI)
 ```
 
@@ -33,7 +37,7 @@ In that case, you can pass the key and value serdes explicitly.
 val got: Future[Option[Int]] =
   saladAPI.get[Int]("test")
       (redis.serde.ByteArraySerdes.stringSerde,
-      redis.serde.CompactByteArraySerdes.intSerde)
+       redis.serde.CompactByteArraySerdes.intSerde)
     .map(valueOpt => valueOpt.map(_ + 1))
 ```
 
@@ -41,11 +45,16 @@ You must ensure that a serde pair is used symmetrically for mutating and accessi
 
 ## Serde-Codec Choices
 The lettuce codec determines the storage format in Redis.
-The serde determines how various Scala types are serialized to the codec format.
+Each connection may have one codec.
+You can create multiple connections with different codecs, sharing underlying client resources.
+But with interchangeable serdes, that is no longer necessary.
 
-The recommended pair is ByteArrayCodec with SnappySerdes or CompactByteArraySerdes (if you know that the data will not compress well).
+The serde determines how various Scala types are serialized to the codec format and provides type safety to the API.
+Each interaction with Redis can use a different serde.
 
-If you use CompressionCodec, it will attempt to compress numeric types which just adds CPU and byte-size overhead.
+The recommended pair is ByteArrayCodec with SnappySerdes or CompactByteArraySerdes (for strings that will not compress well).
+
+CompressionCodec is not recommended as it will attempt to compress singular numeric types which just adds CPU and byte-size overhead.
 
 String serdes are also provided if you require readable keys/values.
 
