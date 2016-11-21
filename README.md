@@ -2,6 +2,7 @@
 Salad wraps the lettuce async Java API to provide an idiomatic API for Scala applications.
 
 Efficient serdes (serializer-deserializers) are provided to encode keys and values as plain byte-arrays or Snappy-compressed byte-arrays.
+CompactByteArraySerdes and SnappySerdes will also compact numeric values to the smallest possible lossless representation.
 
 Single-node Redis, master-slave Sentinel configurations, and sharded Redis Cluster configurations are supported.
 Notably, this is the first Scala client to support Redis Cluster *and* provide an asynchronous API in one package.
@@ -36,7 +37,7 @@ val got: Future[Option[Int]] =
     .map(valueOpt => valueOpt.map(_ + 1))
 ```
 
-You need to ensure that a serde is used symmetrically for a key-value pair.
+You need to ensure that a serde pair is used symmetrically for mutating and accessing a key-value pair.
 
 # SBT
 TODO: publish jars to Maven repo
