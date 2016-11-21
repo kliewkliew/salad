@@ -68,12 +68,12 @@ class CompactLongSerde extends Serde[Long,Array[Byte]] {
 class CompactFloatSerde extends Serde[Float,Array[Byte]] {
   override def serialize(a: Float): Array[Byte] =
     ByteBuffer.allocate(java.lang.Float.BYTES).putFloat(a)
-      .array().dropWhile(_ == 0)
+      .array().takeWhile(_ != 0)
 
   override def deserialize(b: Array[Byte]): Float =
     ByteBuffer.wrap{
       val out = new Array[Byte](java.lang.Float.BYTES)
-      Array.copy(b, 0, out, out.length - b.length, b.length)
+      Array.copy(b, 0, out, 0, b.length)
       out
     }.getFloat
 }
@@ -81,12 +81,12 @@ class CompactFloatSerde extends Serde[Float,Array[Byte]] {
 class CompactDoubleSerde extends Serde[Double,Array[Byte]] {
   override def serialize(a: Double): Array[Byte] =
     ByteBuffer.allocate(java.lang.Double.BYTES).putDouble(a)
-      .array().dropWhile(_ == 0)
+      .array().takeWhile(_ != 0)
 
   override def deserialize(b: Array[Byte]): Double =
     ByteBuffer.wrap{
       val out = new Array[Byte](java.lang.Double.BYTES)
-      Array.copy(b, 0, out, out.length - b.length, b.length)
+      Array.copy(b, 0, out, 0, b.length)
       out
     }.getDouble
 }
