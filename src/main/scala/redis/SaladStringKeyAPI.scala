@@ -9,12 +9,15 @@ import scala.concurrent.Future
   * Wrap the lettuce API to provide an idiomatic Scala API.
   * The unencoded input key is always a String to be encoded to K.
   * @param commands The lettuce async API to be wrapped.
-  * @tparam K The key storage encoding.
-  * @tparam V The value storage encoding.
+  * @tparam EK The key storage encoding.
+  * @tparam EV The value storage encoding.
   */
-case class SaladStringKeyAPI[K,V](commands: RedisAsyncCommands[K, V])  {
+case class SaladStringKeyAPI[EK,EV](commands: RedisAsyncCommands[EK, EV])  {
   val api = SaladAPI(commands)
 
-  def get[U](key: String)(implicit keySerde: Serde[String,K], valSerde: Serde[U,V]): Future[Option[U]] =
-    api.get[String,U](key)
+  def get[DV](key: String)(implicit keySerde: Serde[String,EK], valSerde: Serde[DV,EV]): Future[Option[DV]] =
+    api.get[String,DV](key)
+
+  def set[DV](key: String, value: DV)(implicit keySerde: Serde[String,EK], valSerde: Serde[DV,EV]): Future[Boolean] =
+    api.set[String,DV](key, value)
 }
