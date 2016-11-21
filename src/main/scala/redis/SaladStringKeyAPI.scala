@@ -7,7 +7,8 @@ import scala.concurrent.Future
 
 /**
   * Wrap the lettuce API to provide an idiomatic Scala API.
-  * The unencoded input key is always a String to be encoded to EK
+  * The unencoded input key is always a String to be encoded to EK.
+  * @see SaladAPI for javadocs per method.
   * @param commands The lettuce async API to be wrapped.
   * @tparam EK The key storage encoding.
   * @tparam EV The value storage encoding.

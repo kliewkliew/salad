@@ -19,8 +19,6 @@ case class SaladAPI[EK, EV](commands: RedisAsyncCommands[EK, EV]) {
 
   /**
     * Implicitly convert Future Java types into Future Scala types.
-    * @param in
-    * @return
     */
   implicit def CompletionStageToFuture[T](in: RedisFuture[T]): Future[T] =
     in.toScala
