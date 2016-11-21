@@ -51,40 +51,40 @@ class SnappyByteSerde extends ByteSerde {
 
 class SnappyShortSerde extends ShortSerde {
   override def serialize(a: Short): Array[Byte] =
-    Snappy.compress(super.serialize(a))
+    super.serialize(a)
 
   override def deserialize(b: Array[Byte]): Short =
-    super.deserialize(Snappy.uncompress(b))
+    super.deserialize(b)
 }
 
 class SnappyIntSerde extends IntSerde {
   override def serialize(a: Int): Array[Byte] =
-    Snappy.compress(super.serialize(a))
+    super.serialize(a)
 
   override def deserialize(b: Array[Byte]): Int =
-    super.deserialize(Snappy.uncompress(b))
+    super.deserialize(b)
 }
 
 class SnappyLongSerde extends LongSerde {
   override def serialize(a: Long): Array[Byte] =
-    Snappy.compress(super.serialize(a))
+    super.serialize(a)
 
   override def deserialize(b: Array[Byte]): Long =
-    super.deserialize(Snappy.uncompress(b))
+    super.deserialize(b)
 }
 
 class SnappyFloatSerde extends FloatSerde {
   override def serialize(a: Float): Array[Byte] =
-    Snappy.compress(super.serialize(a))
+    super.serialize(a)
 
   override def deserialize(b: Array[Byte]): Float =
-    super.deserialize(Snappy.uncompress(b))
+    super.deserialize(b)
 }
 
 class SnappyDoubleSerde extends DoubleSerde {
   override def serialize(a: Double): Array[Byte] =
-    Snappy.compress(super.serialize(a))
+    super.serialize(a)
 
   override def deserialize(b: Array[Byte]): Double =
-    super.deserialize(Snappy.uncompress(b))
+    super.deserialize(b)
 }
