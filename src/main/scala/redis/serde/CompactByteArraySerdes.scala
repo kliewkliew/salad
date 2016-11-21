@@ -32,8 +32,11 @@ class CompactShortSerde extends Serde[Short,Array[Byte]] {
       .array().dropWhile(_ == 0)
 
   override def deserialize(b: Array[Byte]): Short =
-    ByteBuffer.wrap(new Array[Byte](java.lang.Short.BYTES - b.length) ++ b)
-      .getShort
+    ByteBuffer.wrap{
+      val out = new Array[Byte](java.lang.Short.BYTES)
+      Array.copy(b, 0, out, out.length - b.length, b.length)
+      out
+    }.getShort
 }
 
 class CompactIntSerde extends Serde[Int,Array[Byte]] {
@@ -42,8 +45,11 @@ class CompactIntSerde extends Serde[Int,Array[Byte]] {
       .array().dropWhile(_ == 0)
 
   override def deserialize(b: Array[Byte]): Int =
-    ByteBuffer.wrap(new Array[Byte](java.lang.Integer.BYTES - b.length) ++ b)
-      .getInt
+    ByteBuffer.wrap{
+      val out = new Array[Byte](java.lang.Integer.BYTES)
+      Array.copy(b, 0, out, out.length - b.length, b.length)
+      out
+    }.getInt
 }
 
 class CompactLongSerde extends Serde[Long,Array[Byte]] {
@@ -52,8 +58,11 @@ class CompactLongSerde extends Serde[Long,Array[Byte]] {
       .array().dropWhile(_ == 0)
 
   override def deserialize(b: Array[Byte]): Long =
-    ByteBuffer.wrap(new Array[Byte](java.lang.Long.BYTES - b.length) ++ b)
-      .getLong
+    ByteBuffer.wrap{
+      val out = new Array[Byte](java.lang.Long.BYTES)
+      Array.copy(b, 0, out, out.length - b.length, b.length)
+      out
+    }.getLong
 }
 
 class CompactFloatSerde extends Serde[Float,Array[Byte]] {
@@ -62,8 +71,11 @@ class CompactFloatSerde extends Serde[Float,Array[Byte]] {
       .array().dropWhile(_ == 0)
 
   override def deserialize(b: Array[Byte]): Float =
-    ByteBuffer.wrap(new Array[Byte](java.lang.Float.BYTES - b.length) ++ b)
-      .getFloat
+    ByteBuffer.wrap{
+      val out = new Array[Byte](java.lang.Float.BYTES)
+      Array.copy(b, 0, out, out.length - b.length, b.length)
+      out
+    }.getFloat
 }
 
 class CompactDoubleSerde extends Serde[Double,Array[Byte]] {
@@ -72,6 +84,9 @@ class CompactDoubleSerde extends Serde[Double,Array[Byte]] {
       .array().dropWhile(_ == 0)
 
   override def deserialize(b: Array[Byte]): Double =
-    ByteBuffer.wrap(new Array[Byte](java.lang.Double.BYTES - b.length) ++ b)
-      .getDouble
+    ByteBuffer.wrap{
+      val out = new Array[Byte](java.lang.Double.BYTES)
+      Array.copy(b, 0, out, out.length - b.length, b.length)
+      out
+    }.getDouble
 }
