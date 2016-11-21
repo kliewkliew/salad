@@ -164,9 +164,9 @@ case class SaladAPI[EK, EV](commands: RedisAsyncCommands[EK, EV]) {
                  (implicit keySerde: Serde[DK,EK], valSerde: Serde[DV,EV])
   : Future[Boolean] = {
     if (nx)
-      commands.hset(keySerde.serialize(key), keySerde.serialize(field), valSerde.serialize(value))
-    else
       commands.hsetnx(keySerde.serialize(key), keySerde.serialize(field), valSerde.serialize(value))
+    else
+      commands.hset(keySerde.serialize(key), keySerde.serialize(field), valSerde.serialize(value))
   }.toScala
     .map(_ == true)// This is necessary to convert java.lang.Boolean to scala.Boolean
 
