@@ -15,9 +15,9 @@ val lettuceAPI = client.connect(ByteArrayCodec.INSTANCE).async
 ```
 
 ## Instantiate Salad Wrapper
- ```
- val saladAPI = SaladStringKeyAPI(lettuceAPI)
- ```
+```
+val saladAPI = SaladStringKeyAPI(lettuceAPI)
+```
 
 ## Use Salad
 To use Snappy compression for strings and byte-arays (and compaction for numeric types):
@@ -37,7 +37,29 @@ val got: Future[Option[Int]] =
     .map(valueOpt => valueOpt.map(_ + 1))
 ```
 
-You need to ensure that a serde pair is used symmetrically for mutating and accessing a key-value pair.
+You must ensure that a serde pair is used symmetrically for mutating and accessing a key-value pair.
+
+## Serde-Codec Choices
+The lettuce codec determines the storage format in Redis.
+The serde determines how various Scala types are serialized to the codec format.
+
+The recommended pair is ByteArrayCodec with SnappySerdes or CompactByteArraySerdes (if you know that the data will not compress well).
+
+If you use CompressionCodec, it will attempt to compress numeric types which just adds CPU and byte-size overhead.
+
+String serdes are also provided if you require readable keys/values.
+
+### ByteArrayCodec
+* ByteArraySerdes
+* CompactByteArraySerdes
+* SnappySerdes
+
+### CompressionCodec
+* ByteArraySerdes
+* CompactByteArraySerdes
+
+### StringCodec, Utf8StringCodec
+* StringSerdes
 
 # SBT
 TODO: publish jars to Maven repo

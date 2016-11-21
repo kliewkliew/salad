@@ -8,25 +8,25 @@ import java.nio.ByteBuffer
   */
 object CompactByteArraySerdes {
 
-  implicit val byteArraySerde = new ByteArraySerde
+  implicit val byteArraySerde = new ByteArrayByteArraySerde
 
-  implicit val stringSerde = new StringSerde
+  implicit val stringSerde = new StringByteArraySerde
 
-  implicit val byteSerde = new ByteSerde
+  implicit val byteSerde = new ByteByteArraySerde
 
-  implicit val shortSerde = new CompactShortSerde
+  implicit val shortSerde = new ShortCompactByteArraySerde
 
-  implicit val intSerde = new CompactIntSerde
+  implicit val intSerde = new IntCompactByteArraySerde
 
-  implicit val longSerde = new CompactLongSerde
+  implicit val longSerde = new LongCompactByteArraySerde
 
-  implicit val floatSerde = new CompactFloatSerde
+  implicit val floatSerde = new FloatCompactByteArraySerde
 
-  implicit val doubleSerde = new CompactDoubleSerde
+  implicit val doubleSerde = new DoubleCompactByteArraySerde
 
 }
 
-class CompactShortSerde extends Serde[Short,Array[Byte]] {
+class ShortCompactByteArraySerde extends Serde[Short,Array[Byte]] {
   override def serialize(a: Short): Array[Byte] =
     ByteBuffer.allocate(java.lang.Short.BYTES).putShort(a)
       .array().dropWhile(_ == 0)
@@ -39,7 +39,7 @@ class CompactShortSerde extends Serde[Short,Array[Byte]] {
     }.getShort
 }
 
-class CompactIntSerde extends Serde[Int,Array[Byte]] {
+class IntCompactByteArraySerde extends Serde[Int,Array[Byte]] {
   override def serialize(a: Int): Array[Byte] =
     ByteBuffer.allocate(java.lang.Integer.BYTES).putInt(a)
       .array().dropWhile(_ == 0)
@@ -52,7 +52,7 @@ class CompactIntSerde extends Serde[Int,Array[Byte]] {
     }.getInt
 }
 
-class CompactLongSerde extends Serde[Long,Array[Byte]] {
+class LongCompactByteArraySerde extends Serde[Long,Array[Byte]] {
   override def serialize(a: Long): Array[Byte] =
     ByteBuffer.allocate(java.lang.Long.BYTES).putLong(a)
       .array().dropWhile(_ == 0)
@@ -65,7 +65,7 @@ class CompactLongSerde extends Serde[Long,Array[Byte]] {
     }.getLong
 }
 
-class CompactFloatSerde extends Serde[Float,Array[Byte]] {
+class FloatCompactByteArraySerde extends Serde[Float,Array[Byte]] {
   override def serialize(a: Float): Array[Byte] =
     ByteBuffer.allocate(java.lang.Float.BYTES).putFloat(a)
       .array().takeWhile(_ != 0)
@@ -78,7 +78,7 @@ class CompactFloatSerde extends Serde[Float,Array[Byte]] {
     }.getFloat
 }
 
-class CompactDoubleSerde extends Serde[Double,Array[Byte]] {
+class DoubleCompactByteArraySerde extends Serde[Double,Array[Byte]] {
   override def serialize(a: Double): Array[Byte] =
     ByteBuffer.allocate(java.lang.Double.BYTES).putDouble(a)
       .array().takeWhile(_ != 0)

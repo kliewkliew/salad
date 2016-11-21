@@ -7,25 +7,25 @@ import java.nio.ByteBuffer
   */
 object ByteArraySerdes {
 
-  implicit val byteArraySerde = new ByteArraySerde
+  implicit val byteArraySerde = new ByteArrayByteArraySerde
 
-  implicit val stringSerde = new StringSerde
+  implicit val stringSerde = new StringByteArraySerde
 
-  implicit val byteSerde = new ByteSerde
+  implicit val byteSerde = new ByteByteArraySerde
 
-  implicit val shortSerde = new ShortSerde
+  implicit val shortSerde = new ShortByteArraySerde
 
-  implicit val intSerde = new IntSerde
+  implicit val intSerde = new IntByteArraySerde
 
-  implicit val longSerde = new LongSerde
+  implicit val longSerde = new LongByteArraySerde
 
-  implicit val floatSerde = new FloatSerde
+  implicit val floatSerde = new FloatByteArraySerde
 
-  implicit val doubleSerde = new DoubleSerde
+  implicit val doubleSerde = new DoubleByteArraySerde
 
 }
 
-class ByteArraySerde extends Serde[Array[Byte], Array[Byte]] {
+class ByteArrayByteArraySerde extends Serde[Array[Byte], Array[Byte]] {
   override def serialize(a: Array[Byte]): Array[Byte] =
     a
 
@@ -33,7 +33,7 @@ class ByteArraySerde extends Serde[Array[Byte], Array[Byte]] {
     b
 }
 
-class StringSerde extends Serde[String, Array[Byte]] {
+class StringByteArraySerde extends Serde[String, Array[Byte]] {
   override def serialize(a: String): Array[Byte] =
     a.getBytes()
 
@@ -41,7 +41,7 @@ class StringSerde extends Serde[String, Array[Byte]] {
     new String(b)
 }
 
-class ByteSerde extends Serde[Byte,Array[Byte]] {
+class ByteByteArraySerde extends Serde[Byte,Array[Byte]] {
   override def serialize(a: Byte): Array[Byte] =
     Array(a)
 
@@ -49,7 +49,7 @@ class ByteSerde extends Serde[Byte,Array[Byte]] {
     b(0)
 }
 
-class ShortSerde extends Serde[Short,Array[Byte]] {
+class ShortByteArraySerde extends Serde[Short,Array[Byte]] {
   override def serialize(a: Short): Array[Byte] =
     ByteBuffer.allocate(java.lang.Short.BYTES).putShort(a).array()
 
@@ -57,7 +57,7 @@ class ShortSerde extends Serde[Short,Array[Byte]] {
     ByteBuffer.wrap(b).getShort
 }
 
-class IntSerde extends Serde[Int,Array[Byte]] {
+class IntByteArraySerde extends Serde[Int,Array[Byte]] {
   override def serialize(a: Int): Array[Byte] =
     ByteBuffer.allocate(java.lang.Integer.BYTES).putInt(a).array()
 
@@ -65,7 +65,7 @@ class IntSerde extends Serde[Int,Array[Byte]] {
     ByteBuffer.wrap(b).getInt
 }
 
-class LongSerde extends Serde[Long,Array[Byte]] {
+class LongByteArraySerde extends Serde[Long,Array[Byte]] {
   override def serialize(a: Long): Array[Byte] =
     ByteBuffer.allocate(java.lang.Long.BYTES).putLong(a).array()
 
@@ -73,7 +73,7 @@ class LongSerde extends Serde[Long,Array[Byte]] {
     ByteBuffer.wrap(b).getLong
 }
 
-class FloatSerde extends Serde[Float,Array[Byte]] {
+class FloatByteArraySerde extends Serde[Float,Array[Byte]] {
   override def serialize(a: Float): Array[Byte] =
     ByteBuffer.allocate(java.lang.Float.BYTES).putFloat(a).array()
 
@@ -81,7 +81,7 @@ class FloatSerde extends Serde[Float,Array[Byte]] {
     ByteBuffer.wrap(b).getFloat
 }
 
-class DoubleSerde extends Serde[Double,Array[Byte]] {
+class DoubleByteArraySerde extends Serde[Double,Array[Byte]] {
   override def serialize(a: Double): Array[Byte] =
     ByteBuffer.allocate(java.lang.Double.BYTES).putDouble(a).array()
 

@@ -8,25 +8,25 @@ import org.xerial.snappy.Snappy
   */
 object SnappySerdes {
 
-  implicit val byteArraySerde = new SnappyByteArraySerde
+  implicit val byteArraySerde = new ByteArraySnappySerde
 
-  implicit val stringSerde = new SnappyStringSerde
+  implicit val stringSerde = new StringSnappySerde
 
-  implicit val byteSerde = new ByteSerde
+  implicit val byteSerde = new ByteByteArraySerde
 
-  implicit val shortSerde = new CompactShortSerde
+  implicit val shortSerde = new ShortCompactByteArraySerde
 
-  implicit val intSerde = new CompactIntSerde
+  implicit val intSerde = new IntCompactByteArraySerde
 
-  implicit val longSerde = new CompactLongSerde
+  implicit val longSerde = new LongCompactByteArraySerde
 
-  implicit val floatSerde = new CompactFloatSerde
+  implicit val floatSerde = new FloatCompactByteArraySerde
 
-  implicit val doubleSerde = new CompactDoubleSerde
+  implicit val doubleSerde = new DoubleCompactByteArraySerde
 
 }
 
-class SnappyByteArraySerde extends ByteArraySerde {
+class ByteArraySnappySerde extends ByteArrayByteArraySerde {
   override def serialize(a: Array[Byte]): Array[Byte] =
     Snappy.compress(super.serialize(a))
 
@@ -34,7 +34,7 @@ class SnappyByteArraySerde extends ByteArraySerde {
     super.deserialize(Snappy.uncompress(b))
 }
 
-class SnappyStringSerde extends StringSerde {
+class StringSnappySerde extends StringByteArraySerde {
   override def serialize(a: String): Array[Byte] =
     Snappy.compress(super.serialize(a))
 
