@@ -3,7 +3,8 @@ package redis.serde
 import org.xerial.snappy.Snappy
 
 /**
-  * Serialize type as a Snappy-compressed byte array
+  * Serialize array-types as Snappy-compressed byte arrays.
+  * Serialize numeric types as compacted byte arrays.
   */
 object SnappySerdes {
 
@@ -11,17 +12,17 @@ object SnappySerdes {
 
   implicit val stringSerde = new SnappyStringSerde
 
-  implicit val byteSerde = new SnappyByteSerde
+  implicit val byteSerde = new ByteSerde
 
-  implicit val shortSerde = new SnappyShortSerde
+  implicit val shortSerde = new CompactShortSerde
 
-  implicit val intSerde = new SnappyIntSerde
+  implicit val intSerde = new CompactIntSerde
 
-  implicit val longSerde = new SnappyLongSerde
+  implicit val longSerde = new CompactLongSerde
 
-  implicit val floatSerde = new SnappyFloatSerde
+  implicit val floatSerde = new CompactFloatSerde
 
-  implicit val doubleSerde = new SnappyDoubleSerde
+  implicit val doubleSerde = new CompactDoubleSerde
 
 }
 
@@ -39,52 +40,4 @@ class SnappyStringSerde extends StringSerde {
 
   override def deserialize(b: Array[Byte]): String =
     super.deserialize(Snappy.uncompress(b))
-}
-
-class SnappyByteSerde extends ByteSerde {
-  override def serialize(a: Byte): Array[Byte] =
-    super.serialize(a)
-
-  override def deserialize(b: Array[Byte]): Byte =
-    super.deserialize(b)
-}
-
-class SnappyShortSerde extends ShortSerde {
-  override def serialize(a: Short): Array[Byte] =
-    super.serialize(a)
-
-  override def deserialize(b: Array[Byte]): Short =
-    super.deserialize(b)
-}
-
-class SnappyIntSerde extends IntSerde {
-  override def serialize(a: Int): Array[Byte] =
-    super.serialize(a)
-
-  override def deserialize(b: Array[Byte]): Int =
-    super.deserialize(b)
-}
-
-class SnappyLongSerde extends LongSerde {
-  override def serialize(a: Long): Array[Byte] =
-    super.serialize(a)
-
-  override def deserialize(b: Array[Byte]): Long =
-    super.deserialize(b)
-}
-
-class SnappyFloatSerde extends FloatSerde {
-  override def serialize(a: Float): Array[Byte] =
-    super.serialize(a)
-
-  override def deserialize(b: Array[Byte]): Float =
-    super.deserialize(b)
-}
-
-class SnappyDoubleSerde extends DoubleSerde {
-  override def serialize(a: Double): Array[Byte] =
-    super.serialize(a)
-
-  override def deserialize(b: Array[Byte]): Double =
-    super.deserialize(b)
 }

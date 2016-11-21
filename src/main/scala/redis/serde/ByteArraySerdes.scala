@@ -3,7 +3,7 @@ package redis.serde
 import java.nio.ByteBuffer
 
 /**
-  * Serialize type as a plain byte array
+  * Serialize all types as plain byte arrays.
   */
 object ByteArraySerdes {
 
