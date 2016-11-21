@@ -24,8 +24,10 @@ case class SaladAPI[EK, EV](commands: RedisAsyncCommands[EK, EV]) {
     * @tparam DK The unencoded key type.
     * @return A Future indicating success.
     */
-  def del[DK](key: DK)(implicit keySerde: Serde[DK,EK]): Future[Boolean] =
-    commands.del(keySerde.serialize(key)).toScala
+  def del[DK](key: DK)
+             (implicit keySerde: Serde[DK,EK])
+  : Future[Boolean] =
+  commands.del(keySerde.serialize(key)).toScala
     .map(_ == 1)
 
   /**
@@ -37,10 +39,12 @@ case class SaladAPI[EK, EV](commands: RedisAsyncCommands[EK, EV]) {
     * @tparam DV The decoded value type.
     * @return A Future containing an Option of the decoded value.
     */
-  def get[DK,DV](key: DK)(implicit keySerde: Serde[DK,EK], valSerde: Serde[DV,EV]): Future[Option[DV]] =
-    commands.get(keySerde.serialize(key)).toScala
-      .map(value => Option.apply(value)
-        .map(valSerde.deserialize))
+  def get[DK,DV](key: DK)
+                (implicit keySerde: Serde[DK,EK], valSerde: Serde[DV,EV])
+  : Future[Option[DV]] =
+  commands.get(keySerde.serialize(key)).toScala
+    .map(value => Option.apply(value)
+      .map(valSerde.deserialize))
 
   /**
     * Set a key-value pair in Redis.
@@ -56,8 +60,11 @@ case class SaladAPI[EK, EV](commands: RedisAsyncCommands[EK, EV]) {
     * @tparam DV The unencoded value type.
     * @return A Future indicating success.
     */
-  def set[DK,DV](key: DK, value: DV, ex: Option[Long] = None, px: Option[Long] = None, nx: Boolean = false, xx: Boolean = false)
-                (implicit keySerde: Serde[DK,EK], valSerde: Serde[DV,EV]): Future[Boolean] = {
+  def set[DK,DV](key: DK, value: DV,
+                 ex: Option[Long] = None, px: Option[Long] = None,
+                 nx: Boolean = false, xx: Boolean = false)
+                (implicit keySerde: Serde[DK,EK], valSerde: Serde[DV,EV])
+  : Future[Boolean] = {
     val args = new SetArgs
     ex.map(args.ex)
     px.map(args.px)
