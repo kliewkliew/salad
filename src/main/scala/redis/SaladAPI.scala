@@ -1,6 +1,6 @@
 package redis
 
-import com.lambdaworks.redis.SetArgs
+import com.lambdaworks.redis.{RedisFuture, SetArgs}
 import com.lambdaworks.redis.api.async.RedisAsyncCommands
 
 import scala.compat.java8.FutureConverters._
@@ -22,9 +22,15 @@ case class SaladAPI[EK, EV](commands: RedisAsyncCommands[EK, EV]) {
     * @param in
     * @return
     */
-  implicit def FutureJavaBooleanToScalaBoolean(in: Future[java.lang.Boolean]): Future[Boolean] =
+  implicit def CompletionStageToFuture[T](in: RedisFuture[T]): Future[T] =
+    in.toScala
+  implicit def RedisFutureJavaBooleanToFutureScalaBoolean(in: RedisFuture[java.lang.Boolean]): Future[Boolean] =
+    in.toScala
+  implicit def FutureJavaBooleanToFutureScalaBoolean(in: Future[java.lang.Boolean]): Future[Boolean] =
     in.map(_ == true)
-  implicit def FutureJavaLongToScalaBoolean(in: Future[java.lang.Long]): Future[Boolean] =
+  implicit def RedisFutureJavaLongToFutureScalaBoolean(in: RedisFuture[java.lang.Long]): Future[Boolean] =
+    in.toScala
+  implicit def FutureJavaLongToFutureScalaBoolean(in: Future[java.lang.Long]): Future[Boolean] =
     in.map(_ == 1)
 
   /**
@@ -37,7 +43,7 @@ case class SaladAPI[EK, EV](commands: RedisAsyncCommands[EK, EV]) {
   def del[DK](key: DK)
              (implicit keySerde: Serde[DK,EK])
   : Future[Boolean] =
-  commands.del(keySerde.serialize(key)).toScala
+  commands.del(keySerde.serialize(key))
 
   /**
     * Set a key's TTL in seconds.
@@ -50,7 +56,7 @@ case class SaladAPI[EK, EV](commands: RedisAsyncCommands[EK, EV]) {
   def expire[DK](key: DK, ex: Long)
                 (implicit keySerde: Serde[DK,EK])
   : Future[Boolean] =
-  commands.expire(keySerde.serialize(key), ex).toScala
+  commands.expire(keySerde.serialize(key), ex)
 
   /**
     * Set a key's TTL in milliseconds.
@@ -63,7 +69,7 @@ case class SaladAPI[EK, EV](commands: RedisAsyncCommands[EK, EV]) {
   def pexpire[DK](key: DK, px: Long)
                  (implicit keySerde: Serde[DK,EK])
   : Future[Boolean] =
-  commands.pexpire(keySerde.serialize(key), px).toScala
+  commands.pexpire(keySerde.serialize(key), px)
 
   /**
     * Remove the expiry from a key.
@@ -75,7 +81,7 @@ case class SaladAPI[EK, EV](commands: RedisAsyncCommands[EK, EV]) {
   def persist[DK](key: DK)
                  (implicit keySerde: Serde[DK,EK])
   : Future[Boolean] =
-  commands.persist(keySerde.serialize(key)).toScala
+  commands.persist(keySerde.serialize(key))
 
   /**
     * Get a key-value.
@@ -89,7 +95,7 @@ case class SaladAPI[EK, EV](commands: RedisAsyncCommands[EK, EV]) {
   def get[DK,DV](key: DK)
                 (implicit keySerde: Serde[DK,EK], valSerde: Serde[DV,EV])
   : Future[Option[DV]] =
-  commands.get(keySerde.serialize(key)).toScala
+  commands.get(keySerde.serialize(key))
     .map(value => Option.apply(value)
       .map(valSerde.deserialize))
 
@@ -118,7 +124,7 @@ case class SaladAPI[EK, EV](commands: RedisAsyncCommands[EK, EV]) {
     if (nx) args.nx()
     if (xx) args.xx()
 
-    commands.set(keySerde.serialize(key), valSerde.serialize(value), args).toScala
+    commands.set(keySerde.serialize(key), valSerde.serialize(value), args)
       .map(_ == "OK")
   }
 
@@ -133,7 +139,7 @@ case class SaladAPI[EK, EV](commands: RedisAsyncCommands[EK, EV]) {
   def hdel[DK](key: DK, field: DK)
               (implicit keySerde: Serde[DK,EK])
   : Future[Boolean] =
-  commands.hdel(keySerde.serialize(key), keySerde.serialize(field)).toScala
+  commands.hdel(keySerde.serialize(key), keySerde.serialize(field))
 
   /**
     * Get a field-value pair of a hash key.
@@ -148,7 +154,7 @@ case class SaladAPI[EK, EV](commands: RedisAsyncCommands[EK, EV]) {
   def hget[DK,DV](key: DK, field: DK)
                  (implicit keySerde: Serde[DK,EK], valSerde: Serde[DV,EV])
   : Future[Option[DV]] =
-  commands.hget(keySerde.serialize(key), keySerde.serialize(field)).toScala
+  commands.hget(keySerde.serialize(key), keySerde.serialize(field))
     .map(value => Option.apply(value)
       .map(valSerde.deserialize))
 
@@ -169,8 +175,8 @@ case class SaladAPI[EK, EV](commands: RedisAsyncCommands[EK, EV]) {
                  (implicit keySerde: Serde[DK,EK], valSerde: Serde[DV,EV])
   : Future[Boolean] =
     if (nx)
-      commands.hsetnx(keySerde.serialize(key), keySerde.serialize(field), valSerde.serialize(value)).toScala
+      commands.hsetnx(keySerde.serialize(key), keySerde.serialize(field), valSerde.serialize(value))
     else
-      commands.hset(keySerde.serialize(key), keySerde.serialize(field), valSerde.serialize(value)).toScala
+      commands.hset(keySerde.serialize(key), keySerde.serialize(field), valSerde.serialize(value))
 
 }
