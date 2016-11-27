@@ -31,6 +31,8 @@ import redis.serde.SnappySerdes._
 val saladAPI = SaladUIIDKeyAPI(lettuceAPI)
 ```
 
+If the strings and byte-array values are not compressible while using SaladStringKeyAPI or SaladUIIDKeyAPI, import `CompactByteArraySerdes` to only compact numeric types.
+
 ## Use Salad
 To use Snappy compression for strings and byte-arays (and compaction for numeric types):
 ```
