@@ -1,6 +1,6 @@
-package com.kliewkliew.salad
+package com.github.kliewkliew.salad
 
-import com.kliewkliew.salad.serde.Serde
+import com.github.kliewkliew.salad.serde.Serde
 import com.lambdaworks.redis.api.async.RedisAsyncCommands
 
 import scala.concurrent.Future
@@ -14,7 +14,7 @@ import scala.concurrent.Future
   */
 case class SaladUIIDKeyAPI(commands: RedisAsyncCommands[Array[Byte], Array[Byte]])  {
   val api = SaladStringKeyAPI(commands)
-  import com.kliewkliew.salad.serde.ByteArraySerdes.stringSerde
+  import com.github.kliewkliew.salad.serde.ByteArraySerdes.stringSerde
 
   def del(key: String)
   : Future[Boolean] =

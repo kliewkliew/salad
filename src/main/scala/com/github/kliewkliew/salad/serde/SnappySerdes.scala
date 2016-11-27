@@ -1,4 +1,4 @@
-package com.kliewkliew.salad.serde
+package com.github.kliewkliew.salad.serde
 
 import org.xerial.snappy.Snappy
 

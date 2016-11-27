@@ -1,4 +1,4 @@
-package com.kliewkliew.salad.serde
+package com.github.kliewkliew.salad.serde
 
 object StringSerdes {
 
