@@ -5,7 +5,7 @@ Efficient serdes (serializer-deserializers) are provided to encode keys and valu
 CompactByteArraySerdes and SnappySerdes will also compact numeric values to the smallest possible lossless representation.
 
 Single-node Redis, master-slave Sentinel configurations, and sharded Redis Cluster configurations are supported.
-Notably, this is the first Scala client to support Redis Cluster *and* provide an asynchronous API in one package.
+Notably, this is the first Scala client to support Redis Cluster *and* provide an asynchronous API together in one package.
 
 # Usage
 ## Instantiate Lettuce API
@@ -28,7 +28,8 @@ To use Snappy compression for strings and byte-arays (and compaction for numeric
 ```
 import redis.serde.SnappySerdes._
 val got: Future[Option[Int]] =
-  saladAPI.get[Int]("test").map(valueOpt => valueOpt.map(_ + 1))
+  saladAPI.get[Int]("test")
+    .map(valueOpt => valueOpt.map(_ + 1))
 ```
 However, if the key string is a uuid, there may not be a lot of repetition in the key and thus compression will only add overhead.
 In that case, you can pass the key and value serdes explicitly.
@@ -44,7 +45,7 @@ val got: Future[Option[Int]] =
 You must ensure that a serde pair is used symmetrically for mutating and accessing a key-value pair.
 
 ## Serde-Codec Choices
-The lettuce codec determines the storage format in Redis.
+The lettuce codec determines the data is encoded over the wire.
 Each connection may have one codec.
 You can create multiple connections with different codecs, sharing underlying client resources.
 But with interchangeable serdes, that is no longer necessary.
@@ -73,9 +74,15 @@ String serdes are also provided if you require readable keys/values.
 # SBT
 TODO: publish jars to Maven repo
 
-## Netty Version Conflict
-If the Netty version conflicts with your application (ie. Play 2.5), add the following inline to `libraryDependencies +=`:
+Salad depends on lettuce 5.x.
+
 ```
-excludeAll ExclusionRule(organization = "io.netty")
+libraryDependencies += "biz.paluch.redis" % "lettuce" % "5.0.0.Beta"
+```
+
+## Netty Version Conflict
+If the Netty version of lettuce conflicts with your application (ie. Play 2.5), add an exclusion rule to lettuce.
+```
+libraryDependencies += "biz.paluch.redis" % "lettuce" % "5.0.0.Beta" excludeAll ExclusionRule(organization = "io.netty")
 ```
 If this doesn't work, you may need a jar with shaded dependencies.

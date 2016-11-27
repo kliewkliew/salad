@@ -1,4 +1,5 @@
 name := "salad"
+organization := "com.kliewkliew"
 
 version := "0.9"
 
