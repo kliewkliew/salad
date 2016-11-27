@@ -1,13 +1,13 @@
-package redis
+package com.kliewkliew.salad
 
-import com.lambdaworks.redis.{RedisFuture, SetArgs}
+import com.kliewkliew.salad.serde.Serde
 import com.lambdaworks.redis.api.async.RedisAsyncCommands
+import com.lambdaworks.redis.{RedisFuture, SetArgs}
 
 import scala.compat.java8.FutureConverters._
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.language.implicitConversions
-import redis.serde.Serde
 
 /**
   * Wrap the lettuce API to provide an idiomatic Scala API.

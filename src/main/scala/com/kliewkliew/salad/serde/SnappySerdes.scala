@@ -1,4 +1,4 @@
-package redis.serde
+package com.kliewkliew.salad.serde
 
 import org.xerial.snappy.Snappy
 

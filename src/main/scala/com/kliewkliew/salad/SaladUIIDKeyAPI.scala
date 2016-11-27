@@ -1,67 +1,62 @@
-package redis
+package com.kliewkliew.salad
 
+import com.kliewkliew.salad.serde.Serde
 import com.lambdaworks.redis.api.async.RedisAsyncCommands
-import redis.serde.Serde
 
 import scala.concurrent.Future
 
 /**
   * Wrap the lettuce API to provide an idiomatic Scala API.
-  * The unencoded input key is always a String to be encoded to EK.
+  * The unencoded input key is always a String to be encoded to a byte-array.
+  * The value is encoded using the implicit serde.
   * @see SaladAPI for javadocs per method.
   * @param commands The lettuce async API to be wrapped.
-  * @tparam EK The key storage encoding.
-  * @tparam EV The value storage encoding.
   */
-case class SaladStringKeyAPI[EK,EV](commands: RedisAsyncCommands[EK, EV])  {
+case class SaladUIIDKeyAPI(commands: RedisAsyncCommands[Array[Byte], Array[Byte]])  {
   val api = SaladAPI(commands)
+  import com.kliewkliew.salad.serde.ByteArraySerdes.stringSerde
 
   def del(key: String)
-         (implicit keySerde: Serde[String,EK])
   : Future[Boolean] =
     api.del(key)
 
   def expire(key: String, ex: Long)
-            (implicit keySerde: Serde[String,EK])
   : Future[Boolean] =
     api.expire(key, ex)
 
   def pexpire(key: String, px: Long)
-            (implicit keySerde: Serde[String,EK])
   : Future[Boolean] =
     api.pexpire(key, px)
 
   def persist(key: String)
-                 (implicit keySerde: Serde[String,EK])
   : Future[Boolean] =
     api.persist(key)
 
   def get[DV](key: String)
-             (implicit keySerde: Serde[String,EK], valSerde: Serde[DV,EV])
+             (implicit valSerde: Serde[DV,Array[Byte]])
   : Future[Option[DV]] =
-    api.get[String,DV](key)
+    api.get[String,DV](key)(stringSerde, valSerde)
 
   def set[DV](key: String, value: DV,
               ex: Option[Long] = None, px: Option[Long] = None,
               nx: Boolean = false, xx: Boolean = false)
-             (implicit keySerde: Serde[String,EK], valSerde: Serde[DV,EV])
+             (implicit valSerde: Serde[DV,Array[Byte]])
   : Future[Boolean] =
-    api.set[String,DV](key, value)
+    api.set[String,DV](key, value)(stringSerde, valSerde)
 
   def hdel(key: String, field: String)
-              (implicit keySerde: Serde[String,EK])
   : Future[Boolean] =
-    api.hdel(key, field)
+    api.hdel(key, field)(stringSerde)
 
   def hget[DV](key: String, field: String)
-                 (implicit keySerde: Serde[String,EK], valSerde: Serde[DV,EV])
+              (implicit valSerde: Serde[DV,Array[Byte]])
   : Future[Option[DV]] =
-    api.hget(key, field)
+    api.hget(key, field)(stringSerde, valSerde)
 
   def hset[DV](key: String, field: String, value: DV,
-                  nx: Boolean = false)
-                 (implicit keySerde: Serde[String,EK], valSerde: Serde[DV,EV])
+               nx: Boolean = false)
+              (implicit valSerde: Serde[DV,Array[Byte]])
   : Future[Boolean] =
-    api.hset(key, field, value, nx)
+    api.hset(key, field, value, nx)(stringSerde, valSerde)
 
 }

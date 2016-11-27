@@ -15,18 +15,25 @@ val lettuceAPI = client.connect(ByteArrayCodec.INSTANCE).async
 ```
 
 ## Instantiate Salad Wrapper
+If the key can be a string, byte-array, or a numeric type:
 ```
+import redis.serde.SnappySerdes._
 val saladAPI = SaladAPI(lettuceAPI)
 ```
-or if the unencoded key will always be a string:
+If the unencoded key will always be a (compressable) string and the value can be any type:
 ```
+import redis.serde.SnappySerdes._
 val saladAPI = SaladStringKeyAPI(lettuceAPI)
+```
+If the unencoded key will always be an uncompressable string and the value can be any type:
+```
+import redis.serde.SnappySerdes._
+val saladAPI = SaladUIIDKeyAPI(lettuceAPI)
 ```
 
 ## Use Salad
 To use Snappy compression for strings and byte-arays (and compaction for numeric types):
 ```
-import redis.serde.SnappySerdes._
 val got: Future[Option[Int]] =
   saladAPI.get[Int]("test")
     .map(valueOpt => valueOpt.map(_ + 1))
@@ -41,6 +48,8 @@ val got: Future[Option[Int]] =
        redis.serde.CompactByteArraySerdes.intSerde)
     .map(valueOpt => valueOpt.map(_ + 1))
 ```
+
+If the key is always a string UIID and the value is always numeric or a compressable string or byte-array, you can use the simplified `SaladUIIDKeyAPI`.
 
 You must ensure that a serde pair is used symmetrically for mutating and accessing a key-value pair.
 
@@ -77,7 +86,7 @@ TODO: publish jars to Maven repo
 Salad depends on lettuce 5.x.
 
 ```
-libraryDependencies += "biz.paluch.redis" % "lettuce" % "5.0.0.Beta"
+libraryDependencies += "biz.paluch.redis" % "lettuce" % "5.0.0.Beta1"
 ```
 
 ## Netty Version Conflict
