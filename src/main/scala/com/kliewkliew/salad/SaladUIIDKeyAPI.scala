@@ -13,7 +13,7 @@ import scala.concurrent.Future
   * @param commands The lettuce async API to be wrapped.
   */
 case class SaladUIIDKeyAPI(commands: RedisAsyncCommands[Array[Byte], Array[Byte]])  {
-  val api = SaladAPI(commands)
+  val api = SaladStringKeyAPI(commands)
   import com.kliewkliew.salad.serde.ByteArraySerdes.stringSerde
 
   def del(key: String)
@@ -35,14 +35,14 @@ case class SaladUIIDKeyAPI(commands: RedisAsyncCommands[Array[Byte], Array[Byte]
   def get[DV](key: String)
              (implicit valSerde: Serde[DV,Array[Byte]])
   : Future[Option[DV]] =
-    api.get[String,DV](key)(stringSerde, valSerde)
+    api.get[DV](key)(stringSerde, valSerde)
 
   def set[DV](key: String, value: DV,
               ex: Option[Long] = None, px: Option[Long] = None,
               nx: Boolean = false, xx: Boolean = false)
              (implicit valSerde: Serde[DV,Array[Byte]])
   : Future[Boolean] =
-    api.set[String,DV](key, value)(stringSerde, valSerde)
+    api.set[DV](key, value, ex, px, nx, xx)(stringSerde, valSerde)
 
   def hdel(key: String, field: String)
   : Future[Boolean] =

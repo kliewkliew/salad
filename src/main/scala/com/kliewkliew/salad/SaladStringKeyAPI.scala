@@ -46,7 +46,7 @@ case class SaladStringKeyAPI[EK,EV](commands: RedisAsyncCommands[EK, EV])  {
               nx: Boolean = false, xx: Boolean = false)
              (implicit keySerde: Serde[String,EK], valSerde: Serde[DV,EV])
   : Future[Boolean] =
-    api.set[String,DV](key, value)
+    api.set[String,DV](key, value, ex, px, nx, xx)
 
   def hdel(key: String, field: String)
               (implicit keySerde: Serde[String,EK])
