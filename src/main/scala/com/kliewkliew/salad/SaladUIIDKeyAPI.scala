@@ -35,14 +35,14 @@ case class SaladUIIDKeyAPI(commands: RedisAsyncCommands[Array[Byte], Array[Byte]
   def get[DV](key: String)
              (implicit valSerde: Serde[DV,Array[Byte]])
   : Future[Option[DV]] =
-    api.get[DV](key)(stringSerde, valSerde)
+    api.get(key)(stringSerde, valSerde)
 
   def set[DV](key: String, value: DV,
               ex: Option[Long] = None, px: Option[Long] = None,
               nx: Boolean = false, xx: Boolean = false)
              (implicit valSerde: Serde[DV,Array[Byte]])
   : Future[Boolean] =
-    api.set[DV](key, value, ex, px, nx, xx)(stringSerde, valSerde)
+    api.set(key, value, ex, px, nx, xx)(stringSerde, valSerde)
 
   def hdel(key: String, field: String)
   : Future[Boolean] =
