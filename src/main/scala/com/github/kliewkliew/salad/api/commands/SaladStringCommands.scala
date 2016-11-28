@@ -14,7 +14,7 @@ import scala.concurrent.Future
   * @tparam API The lettuce API to wrap.
   */
 trait SaladStringCommands[EK,EV,API] {
-  def commands: API with RedisStringAsyncCommands[EK,EV]
+  def api: API with RedisStringAsyncCommands[EK,EV]
 
   /**
     * Get a key-value.
@@ -28,7 +28,7 @@ trait SaladStringCommands[EK,EV,API] {
   def get[DK,DV](key: DK)
                 (implicit keySerde: Serde[DK,EK], valSerde: Serde[DV,EV])
   : Future[Option[DV]] =
-  commands.get(keySerde.serialize(key))
+  api.get(keySerde.serialize(key))
     .map(value => Option.apply(value)
       .map(valSerde.deserialize))
 
@@ -57,7 +57,7 @@ trait SaladStringCommands[EK,EV,API] {
     if (nx) args.nx()
     if (xx) args.xx()
 
-    commands.set(keySerde.serialize(key), valSerde.serialize(value), args)
+    api.set(keySerde.serialize(key), valSerde.serialize(value), args)
       .map(_ == "OK")
   }
 

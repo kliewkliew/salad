@@ -12,7 +12,7 @@ import scala.concurrent.Future
   * @tparam API The lettuce API to wrap.
   */
 trait SaladKeyCommands[EK,EV,API] {
-  def commands: API with RedisKeyAsyncCommands[EK,EV]
+  def api: API with RedisKeyAsyncCommands[EK,EV]
 
   /**
     * Delete a key-value pair.
@@ -24,7 +24,7 @@ trait SaladKeyCommands[EK,EV,API] {
   def del[DK](key: DK)
              (implicit keySerde: Serde[DK,EK])
   : Future[Boolean] =
-  commands.del(keySerde.serialize(key))
+  api.del(keySerde.serialize(key))
 
   /**
     * Set a key's TTL in seconds.
@@ -37,7 +37,7 @@ trait SaladKeyCommands[EK,EV,API] {
   def expire[DK](key: DK, ex: Long)
                 (implicit keySerde: Serde[DK,EK])
   : Future[Boolean] =
-  commands.expire(keySerde.serialize(key), ex)
+  api.expire(keySerde.serialize(key), ex)
 
   /**
     * Set a key's TTL in milliseconds.
@@ -50,7 +50,7 @@ trait SaladKeyCommands[EK,EV,API] {
   def pexpire[DK](key: DK, px: Long)
                  (implicit keySerde: Serde[DK,EK])
   : Future[Boolean] =
-  commands.pexpire(keySerde.serialize(key), px)
+  api.pexpire(keySerde.serialize(key), px)
 
   /**
     * Remove the expiry from a key.
@@ -62,6 +62,6 @@ trait SaladKeyCommands[EK,EV,API] {
   def persist[DK](key: DK)
                  (implicit keySerde: Serde[DK,EK])
   : Future[Boolean] =
-  commands.persist(keySerde.serialize(key))
+  api.persist(keySerde.serialize(key))
 
 }
