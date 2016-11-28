@@ -1,7 +1,7 @@
 package com.github.kliewkliew.salad.api
 
 import com.github.kliewkliew.salad.serde.Serde
-import com.lambdaworks.redis.api.async.RedisAsyncCommands
+import com.lambdaworks.redis.api.async._
 
 import scala.concurrent.Future
 
@@ -12,7 +12,12 @@ import scala.concurrent.Future
   * @see SaladAPI for javadocs per method.
   * @param commands The lettuce async API to be wrapped.
   */
-case class SaladUIIDKeyAPI(commands: RedisAsyncCommands[Array[Byte], Array[Byte]])  {
+case class SaladUIIDKeyAPI[API]
+(commands: API
+  with RedisHashAsyncCommands[Array[Byte],Array[Byte]]
+  with RedisKeyAsyncCommands[Array[Byte],Array[Byte]]
+  with RedisStringAsyncCommands[Array[Byte],Array[Byte]]
+) {
   val api = SaladStringKeyAPI(commands)
   import com.github.kliewkliew.salad.serde.ByteArraySerdes.stringSerde
 

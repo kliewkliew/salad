@@ -1,7 +1,7 @@
 package com.github.kliewkliew.salad.api
 
 import com.github.kliewkliew.salad.serde.Serde
-import com.lambdaworks.redis.api.async.RedisAsyncCommands
+import com.lambdaworks.redis.api.async._
 
 import scala.concurrent.Future
 
@@ -13,7 +13,12 @@ import scala.concurrent.Future
   * @tparam EK The key storage encoding.
   * @tparam EV The value storage encoding.
   */
-case class SaladStringKeyAPI[EK,EV](commands: RedisAsyncCommands[EK, EV])  {
+case class SaladStringKeyAPI[EK,EV,API]
+(commands: API
+  with RedisHashAsyncCommands[EK,EV]
+  with RedisKeyAsyncCommands[EK,EV]
+  with RedisStringAsyncCommands[EK,EV]
+) {
   val api = SaladAPI(commands)
 
   def del(key: String)
