@@ -1,4 +1,4 @@
-package com.github.kliewkliew.salad
+package com.github.kliewkliew.salad.api
 
 import com.github.kliewkliew.salad.serde.Serde
 import com.lambdaworks.redis.api.async.RedisAsyncCommands
