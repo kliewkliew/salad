@@ -94,6 +94,6 @@ libraryDependencies += "biz.paluch.redis" % "lettuce" % "5.0.0.Beta1"
 ## Netty Version Conflict
 If the Netty version of lettuce conflicts with your application (ie. Play 2.5), add an exclusion rule to lettuce.
 ```
-libraryDependencies += "biz.paluch.redis" % "lettuce" % "5.0.0.Beta" excludeAll ExclusionRule(organization = "io.netty")
+libraryDependencies += "biz.paluch.redis" % "lettuce" % "5.0.0.Beta1" excludeAll ExclusionRule(organization = "io.netty")
 ```
 If this doesn't work, you may need a jar with shaded dependencies.

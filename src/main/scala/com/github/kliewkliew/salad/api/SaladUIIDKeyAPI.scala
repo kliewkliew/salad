@@ -11,6 +11,7 @@ import scala.concurrent.Future
   * The value is encoded using the implicit serde.
   * @see SaladAPI for javadocs per method.
   * @param commands The lettuce async API to be wrapped.
+  * @tparam API The lettuce API to wrap.
   */
 case class SaladUIIDKeyAPI[API]
 (commands: API

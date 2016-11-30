@@ -12,6 +12,7 @@ import scala.concurrent.Future
   * @param commands The lettuce async API to be wrapped.
   * @tparam EK The key storage encoding.
   * @tparam EV The value storage encoding.
+  * @tparam API The lettuce API to wrap.
   */
 case class SaladStringKeyAPI[EK,EV,API]
 (commands: API

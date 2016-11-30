@@ -1,5 +1,5 @@
 name := "salad"
-organization := "com.kliewkliew"
+organization := "com.github.kliewkliew"
 
 version := "0.9.04"
 
