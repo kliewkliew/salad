@@ -1,4 +1,6 @@
-package com.github.kliewkliew.salad.api.commands
+package com.github.kliewkliew.salad.api
+
+import com.github.kliewkliew.salad.api.FutureConverters._
 
 import com.github.kliewkliew.salad.serde.Serde
 import com.lambdaworks.redis.SetArgs
@@ -14,7 +16,7 @@ import scala.concurrent.Future
   * @tparam API The lettuce API to wrap.
   */
 trait SaladStringCommands[EK,EV,API] {
-  def api: API with RedisStringAsyncCommands[EK,EV]
+  def underlying: API with RedisStringAsyncCommands[EK,EV]
 
   /**
     * Get a key-value.
@@ -28,9 +30,9 @@ trait SaladStringCommands[EK,EV,API] {
   def get[DK,DV](key: DK)
                 (implicit keySerde: Serde[DK,EK], valSerde: Serde[DV,EV])
   : Future[Option[DV]] =
-  api.get(keySerde.serialize(key))
-    .map(value => Option.apply(value)
-      .map(valSerde.deserialize))
+    underlying.get(keySerde.serialize(key))
+      .map(value => Option.apply(value)
+        .map(valSerde.deserialize))
 
   /**
     * Set a key-value pair.
@@ -57,8 +59,7 @@ trait SaladStringCommands[EK,EV,API] {
     if (nx) args.nx()
     if (xx) args.xx()
 
-    api.set(keySerde.serialize(key), valSerde.serialize(value), args)
-      .map(_ == "OK")
+    underlying.set(keySerde.serialize(key), valSerde.serialize(value), args).isOK
   }
 
 }

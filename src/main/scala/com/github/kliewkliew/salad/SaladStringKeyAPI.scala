@@ -1,4 +1,4 @@
-package com.github.kliewkliew.salad.api
+package com.github.kliewkliew.salad
 
 import com.github.kliewkliew.salad.serde.Serde
 import com.lambdaworks.redis.api.async._
@@ -9,18 +9,17 @@ import scala.concurrent.Future
   * Wrap the lettuce API to provide an idiomatic Scala API.
   * The unencoded input key is always a String to be encoded to EK.
   * @see SaladAPI for javadocs per method.
-  * @param commands The lettuce async API to be wrapped.
+  * @param underlying The lettuce async API to be wrapped.
   * @tparam EK The key storage encoding.
   * @tparam EV The value storage encoding.
-  * @tparam API The lettuce API to wrap.
   */
 case class SaladStringKeyAPI[EK,EV,API]
-(commands: API
+(underlying: API
   with RedisHashAsyncCommands[EK,EV]
   with RedisKeyAsyncCommands[EK,EV]
   with RedisStringAsyncCommands[EK,EV]
 ) {
-  val api = SaladAPI(commands)
+  val api = SaladAPI(underlying)
 
   def del(key: String)
          (implicit keySerde: Serde[String,EK])

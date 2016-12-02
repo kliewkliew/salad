@@ -1,4 +1,4 @@
-package com.github.kliewkliew.salad.api
+package com.github.kliewkliew.salad
 
 import com.github.kliewkliew.salad.serde.Serde
 import com.lambdaworks.redis.api.async._
@@ -10,16 +10,15 @@ import scala.concurrent.Future
   * The unencoded input key is always a String to be encoded to a byte-array.
   * The value is encoded using the implicit serde.
   * @see SaladAPI for javadocs per method.
-  * @param commands The lettuce async API to be wrapped.
-  * @tparam API The lettuce API to wrap.
+  * @param underlying The lettuce async API to be wrapped.
   */
 case class SaladUIIDKeyAPI[API]
-(commands: API
+(underlying: API
   with RedisHashAsyncCommands[Array[Byte],Array[Byte]]
   with RedisKeyAsyncCommands[Array[Byte],Array[Byte]]
   with RedisStringAsyncCommands[Array[Byte],Array[Byte]]
 ) {
-  val api = SaladStringKeyAPI(commands)
+  val api = SaladStringKeyAPI(underlying)
   import com.github.kliewkliew.salad.serde.ByteArraySerdes.stringSerde
 
   def del(key: String)

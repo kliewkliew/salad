@@ -1,4 +1,6 @@
-package com.github.kliewkliew.salad.api.commands
+package com.github.kliewkliew.salad.api
+
+import com.github.kliewkliew.salad.api.FutureConverters._
 
 import com.github.kliewkliew.salad.serde.Serde
 import com.lambdaworks.redis.api.async.RedisHashAsyncCommands
@@ -13,7 +15,7 @@ import scala.concurrent.Future
   * @tparam API The lettuce API to wrap.
   */
 trait SaladHashCommands[EK,EV,API] {
-  def api: API with RedisHashAsyncCommands[EK,EV]
+  def underlying: API with RedisHashAsyncCommands[EK,EV]
 
   /**
     * Delete a field-value pair of a hash key.
@@ -26,7 +28,7 @@ trait SaladHashCommands[EK,EV,API] {
   def hdel[DK](key: DK, field: DK)
               (implicit keySerde: Serde[DK,EK])
   : Future[Boolean] =
-  api.hdel(keySerde.serialize(key), keySerde.serialize(field))
+    underlying.hdel(keySerde.serialize(key), keySerde.serialize(field))
 
   /**
     * Get a field-value pair of a hash key.
@@ -41,9 +43,9 @@ trait SaladHashCommands[EK,EV,API] {
   def hget[DK,DV](key: DK, field: DK)
                  (implicit keySerde: Serde[DK,EK], valSerde: Serde[DV,EV])
   : Future[Option[DV]] =
-  api.hget(keySerde.serialize(key), keySerde.serialize(field))
-    .map(value => Option.apply(value)
-      .map(valSerde.deserialize))
+    underlying.hget(keySerde.serialize(key), keySerde.serialize(field))
+      .map(value => Option.apply(value)
+        .map(valSerde.deserialize))
 
   /**
     * Set a field-value pair for a hash key.
@@ -62,8 +64,8 @@ trait SaladHashCommands[EK,EV,API] {
                  (implicit keySerde: Serde[DK,EK], valSerde: Serde[DV,EV])
   : Future[Boolean] =
   if (nx)
-    api.hsetnx(keySerde.serialize(key), keySerde.serialize(field), valSerde.serialize(value))
+    underlying.hsetnx(keySerde.serialize(key), keySerde.serialize(field), valSerde.serialize(value))
   else
-    api.hset(keySerde.serialize(key), keySerde.serialize(field), valSerde.serialize(value))
+    underlying.hset(keySerde.serialize(key), keySerde.serialize(field), valSerde.serialize(value))
 
 }
