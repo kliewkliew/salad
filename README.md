@@ -1,5 +1,5 @@
 # Salad
-Salad wraps the lettuce async Java API to provide an idiomatic API for Scala applications.
+Salad wraps the lettuce async and sync Java API to provide an idiomatic API for Scala applications.
 
 Efficient serdes (serializer-deserializers) are provided to encode keys and values as plain byte-arrays or Snappy-compressed byte-arrays.
 CompactByteArraySerdes and SnappySerdes will also compact numeric values to the smallest possible lossless representation.
@@ -8,6 +8,8 @@ Single-node Redis, master-slave Sentinel configurations, and sharded Redis Clust
 Notably, this is the first Scala client to support Redis Cluster *and* provide an asynchronous API together in one package.
 
 # Usage
+There are wrappers for the both the asynchronous and synchronous API.
+
 ## Instantiate Lettuce API
 ```
 val client = RedisClient.create("redis://localhost")
@@ -18,17 +20,17 @@ val lettuceAPI = client.connect(ByteArrayCodec.INSTANCE).async
 If the key can be a string, byte-array, or a numeric type:
 ```
 import redis.serde.SnappySerdes._
-val saladAPI = SaladAPI(lettuceAPI)
+val saladAPI = AsyncSaladAPI(lettuceAPI)
 ```
 If the unencoded key will always be a (compressable) string and the value can be any type:
 ```
 import redis.serde.SnappySerdes._
-val saladAPI = SaladStringKeyAPI(lettuceAPI)
+val saladAPI = AsyncSaladStringKeyAPI(lettuceAPI)
 ```
 If the unencoded key will always be an uncompressable string and the value can be any type:
 ```
 import redis.serde.SnappySerdes._
-val saladAPI = SaladUIIDKeyAPI(lettuceAPI)
+val saladAPI = AsyncSaladUIIDKeyAPI(lettuceAPI)
 ```
 
 If the strings and byte-array values are not compressible while using SaladStringKeyAPI or SaladUIIDKeyAPI, import `CompactByteArraySerdes` to only compact numeric types.
