@@ -1,6 +1,5 @@
-package com.github.kliewkliew.salad
+package com.github.kliewkliew.salad.api.async
 
-import com.github.kliewkliew.salad.api.{SaladHashCommands, SaladKeyCommands, SaladStringCommands}
 import com.lambdaworks.redis.api.async._
 
 /**
@@ -10,7 +9,7 @@ import com.lambdaworks.redis.api.async._
   * @tparam EV The value storage encoding.
   * @tparam API The lettuce API to wrap.
   */
-case class SaladAPI[EK,EV,API]
+case class AsyncSaladAPI[EK,EV,API]
 (underlying: API
   with RedisHashAsyncCommands[EK,EV]
   with RedisKeyAsyncCommands[EK,EV]

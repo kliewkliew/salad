@@ -1,4 +1,4 @@
-package com.github.kliewkliew.salad.api
+package com.github.kliewkliew.salad.api.async
 
 import com.lambdaworks.redis.RedisFuture
 
@@ -28,7 +28,8 @@ object FutureConverters {
     in.map(_ == 1)
 
   /**
-    * These implicits are apt to cause compiler problems so they are wrappers that must be invoked manually.
+    * These implicits are apt to cause compiler problems so they are implemented as wrappers that
+    * must be invoked manually.
     *   ie. saladAPI.api.clusterReplicate(poorestMaster).isOK
     */
   implicit class RedisFutureStringToFutureScalaBoolean(in: RedisFuture[String]) {

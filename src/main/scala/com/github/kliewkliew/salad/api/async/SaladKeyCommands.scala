@@ -1,6 +1,6 @@
-package com.github.kliewkliew.salad.api
+package com.github.kliewkliew.salad.api.async
 
-import com.github.kliewkliew.salad.api.FutureConverters._
+import FutureConverters._
 
 import com.github.kliewkliew.salad.serde.Serde
 import com.lambdaworks.redis.api.async.RedisKeyAsyncCommands

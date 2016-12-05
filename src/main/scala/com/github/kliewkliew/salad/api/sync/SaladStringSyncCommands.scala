@@ -1,13 +1,8 @@
-package com.github.kliewkliew.salad.api
-
-import com.github.kliewkliew.salad.api.FutureConverters._
+package com.github.kliewkliew.salad.api.sync
 
 import com.github.kliewkliew.salad.serde.Serde
 import com.lambdaworks.redis.SetArgs
-import com.lambdaworks.redis.api.async.RedisStringAsyncCommands
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import com.lambdaworks.redis.api.sync.RedisStringCommands
 
 /**
   * Wrap the lettuce API to provide an idiomatic Scala API.
@@ -15,8 +10,8 @@ import scala.concurrent.Future
   * @tparam EV The value storage encoding.
   * @tparam API The lettuce API to wrap.
   */
-trait SaladStringCommands[EK,EV,API] {
-  def underlying: API with RedisStringAsyncCommands[EK,EV]
+trait SaladStringSyncCommands[EK,EV,API] {
+  def underlying: API with RedisStringCommands[EK,EV]
 
   /**
     * Get a key-value.
@@ -25,14 +20,13 @@ trait SaladStringCommands[EK,EV,API] {
     * @param valSerde The serde to decode the returned value.
     * @tparam DK The unencoded key type.
     * @tparam DV The decoded value type.
-    * @return A Future containing an Option of the decoded value.
+    * @return An Option of the decoded value.
     */
   def get[DK,DV](key: DK)
                 (implicit keySerde: Serde[DK,EK], valSerde: Serde[DV,EV])
-  : Future[Option[DV]] =
-    underlying.get(keySerde.serialize(key))
-      .map(value => Option.apply(value)
-        .map(valSerde.deserialize))
+  : Option[DV] =
+  Option.apply(underlying.get(keySerde.serialize(key)))
+    .map(valSerde.deserialize)
 
   /**
     * Set a key-value pair.
@@ -46,20 +40,20 @@ trait SaladStringCommands[EK,EV,API] {
     * @param valSerde The serde to encode the value.
     * @tparam DK The unencoded key type.
     * @tparam DV The unencoded value type.
-    * @return A Future indicating success.
+    * @return A Boolean indicating success.
     */
   def set[DK,DV](key: DK, value: DV,
                  ex: Option[Long] = None, px: Option[Long] = None,
                  nx: Boolean = false, xx: Boolean = false)
                 (implicit keySerde: Serde[DK,EK], valSerde: Serde[DV,EV])
-  : Future[Boolean] = {
+  : Boolean = {
     val args = new SetArgs
     ex.map(args.ex)
     px.map(args.px)
     if (nx) args.nx()
     if (xx) args.xx()
 
-    underlying.set(keySerde.serialize(key), valSerde.serialize(value), args).isOK
+    underlying.set(keySerde.serialize(key), valSerde.serialize(value), args) == "OK"
   }
 
 }

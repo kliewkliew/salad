@@ -1,12 +1,8 @@
-package com.github.kliewkliew.salad.api
+package com.github.kliewkliew.salad.api.sync
 
-import com.github.kliewkliew.salad.api.FutureConverters._
 
 import com.github.kliewkliew.salad.serde.Serde
-import com.lambdaworks.redis.api.async.RedisHashAsyncCommands
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import com.lambdaworks.redis.api.sync.RedisHashCommands
 
 /**
   * Wrap the lettuce API to provide an idiomatic Scala API.
@@ -14,8 +10,8 @@ import scala.concurrent.Future
   * @tparam EV The value storage encoding.
   * @tparam API The lettuce API to wrap.
   */
-trait SaladHashCommands[EK,EV,API] {
-  def underlying: API with RedisHashAsyncCommands[EK,EV]
+trait SaladHashSyncCommands[EK,EV,API] {
+  def underlying: API with RedisHashCommands[EK,EV]
 
   /**
     * Delete a field-value pair of a hash key.
@@ -23,12 +19,12 @@ trait SaladHashCommands[EK,EV,API] {
     * @param field The field to delete.
     * @param keySerde The serde to encode the key and field.
     * @tparam DK The unencoded key type.
-    * @return A Future indicating success.
+    * @return A Boolean indicating success.
     */
   def hdel[DK](key: DK, field: DK)
               (implicit keySerde: Serde[DK,EK])
-  : Future[Boolean] =
-    underlying.hdel(keySerde.serialize(key), keySerde.serialize(field))
+  : Boolean =
+  underlying.hdel(keySerde.serialize(key), keySerde.serialize(field)) == 1
 
   /**
     * Get a field-value pair of a hash key.
@@ -38,14 +34,13 @@ trait SaladHashCommands[EK,EV,API] {
     * @param valSerde The serde to decode the returned value.
     * @tparam DK The unencoded key type.
     * @tparam DV The decoded value type.
-    * @return A Future containing an Option of the decoded value.
+    * @return An Option of the decoded value.
     */
   def hget[DK,DV](key: DK, field: DK)
                  (implicit keySerde: Serde[DK,EK], valSerde: Serde[DV,EV])
-  : Future[Option[DV]] =
-    underlying.hget(keySerde.serialize(key), keySerde.serialize(field))
-      .map(value => Option.apply(value)
-        .map(valSerde.deserialize))
+  : Option[DV] =
+  Option.apply(underlying.hget(keySerde.serialize(key), keySerde.serialize(field)))
+    .map(valSerde.deserialize)
 
   /**
     * Set a field-value pair for a hash key.
@@ -57,12 +52,12 @@ trait SaladHashCommands[EK,EV,API] {
     * @param valSerde The serde to decode the returned value.
     * @tparam DK The unencoded key type.
     * @tparam DV The decoded value type.
-    * @return A Future indicating success.
+    * @return A Boolean indicating success.
     */
   def hset[DK,DV](key: DK, field: DK, value: DV,
                   nx: Boolean = false)
                  (implicit keySerde: Serde[DK,EK], valSerde: Serde[DV,EV])
-  : Future[Boolean] =
+  : Boolean =
   if (nx)
     underlying.hsetnx(keySerde.serialize(key), keySerde.serialize(field), valSerde.serialize(value))
   else
