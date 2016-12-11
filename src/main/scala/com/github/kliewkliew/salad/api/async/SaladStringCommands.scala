@@ -1,13 +1,13 @@
 package com.github.kliewkliew.salad.api.async
 
 import FutureConverters._
-
 import com.github.kliewkliew.salad.serde.Serde
 import com.lambdaworks.redis.SetArgs
 import com.lambdaworks.redis.api.async.RedisStringAsyncCommands
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.Try
 
 /**
   * Wrap the lettuce API to provide an idiomatic Scala API.
@@ -30,7 +30,7 @@ trait SaladStringCommands[EK,EV,API] {
   def get[DK,DV](key: DK)
                 (implicit keySerde: Serde[DK,EK], valSerde: Serde[DV,EV])
   : Future[Option[DV]] =
-    underlying.get(keySerde.serialize(key))
+    Try(underlying.get(keySerde.serialize(key))).toFuture
       .map(value => Option.apply(value)
         .map(valSerde.deserialize))
 
@@ -59,7 +59,7 @@ trait SaladStringCommands[EK,EV,API] {
     if (nx) args.nx()
     if (xx) args.xx()
 
-    underlying.set(keySerde.serialize(key), valSerde.serialize(value), args).isOK
+    Try(underlying.set(keySerde.serialize(key), valSerde.serialize(value), args)).toFuture.isOK
   }
 
 }

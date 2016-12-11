@@ -4,6 +4,8 @@ import com.github.kliewkliew.salad.serde.Serde
 import com.lambdaworks.redis.SetArgs
 import com.lambdaworks.redis.api.sync.RedisStringCommands
 
+import scala.util.Try
+
 /**
   * Wrap the lettuce API to provide an idiomatic Scala API.
   * @tparam EK The key storage encoding.
@@ -24,9 +26,11 @@ trait SaladStringSyncCommands[EK,EV,API] {
     */
   def get[DK,DV](key: DK)
                 (implicit keySerde: Serde[DK,EK], valSerde: Serde[DV,EV])
-  : Option[DV] =
-  Option.apply(underlying.get(keySerde.serialize(key)))
-    .map(valSerde.deserialize)
+  : Try[Option[DV]] =
+    Try(
+      Option.apply(underlying.get(keySerde.serialize(key)))
+        .map(valSerde.deserialize))
+
 
   /**
     * Set a key-value pair.
@@ -46,14 +50,14 @@ trait SaladStringSyncCommands[EK,EV,API] {
                  ex: Option[Long] = None, px: Option[Long] = None,
                  nx: Boolean = false, xx: Boolean = false)
                 (implicit keySerde: Serde[DK,EK], valSerde: Serde[DV,EV])
-  : Boolean = {
+  : Try[Boolean] = {
     val args = new SetArgs
     ex.map(args.ex)
     px.map(args.px)
     if (nx) args.nx()
     if (xx) args.xx()
 
-    underlying.set(keySerde.serialize(key), valSerde.serialize(value), args) == "OK"
+    Try(underlying.set(keySerde.serialize(key), valSerde.serialize(value), args)).map(_ == "OK")
   }
 
 }

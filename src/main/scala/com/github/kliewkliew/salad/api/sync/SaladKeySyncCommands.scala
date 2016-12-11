@@ -3,6 +3,8 @@ package com.github.kliewkliew.salad.api.sync
 import com.github.kliewkliew.salad.serde.Serde
 import com.lambdaworks.redis.api.sync.RedisKeyCommands
 
+import scala.util.Try
+
 /**
   * Wrap the lettuce API to provide an idiomatic Scala API.
   * @tparam EK The key storage encoding.
@@ -21,8 +23,8 @@ trait SaladKeySyncCommands[EK,EV,API] {
     */
   def del[DK](key: DK)
              (implicit keySerde: Serde[DK,EK])
-  : Boolean =
-  underlying.del(keySerde.serialize(key)) == 1
+  : Try[Boolean] =
+    Try(underlying.del(keySerde.serialize(key))).map(_ == 1)
 
   /**
     * Set a key's TTL in seconds.
@@ -34,8 +36,8 @@ trait SaladKeySyncCommands[EK,EV,API] {
     */
   def expire[DK](key: DK, ex: Long)
                 (implicit keySerde: Serde[DK,EK])
-  : Boolean =
-  underlying.expire(keySerde.serialize(key), ex)
+  : Try[Boolean] =
+    Try(underlying.expire(keySerde.serialize(key), ex))
 
   /**
     * Set a key's TTL in milliseconds.
@@ -47,8 +49,8 @@ trait SaladKeySyncCommands[EK,EV,API] {
     */
   def pexpire[DK](key: DK, px: Long)
                  (implicit keySerde: Serde[DK,EK])
-  : Boolean =
-  underlying.pexpire(keySerde.serialize(key), px)
+  : Try[Boolean] =
+    Try(underlying.pexpire(keySerde.serialize(key), px))
 
   /**
     * Remove the expiry from a key.
@@ -59,7 +61,7 @@ trait SaladKeySyncCommands[EK,EV,API] {
     */
   def persist[DK](key: DK)
                  (implicit keySerde: Serde[DK,EK])
-  : Boolean =
-  underlying.persist(keySerde.serialize(key))
+  : Try[Boolean] =
+    Try(underlying.persist(keySerde.serialize(key)))
 
 }

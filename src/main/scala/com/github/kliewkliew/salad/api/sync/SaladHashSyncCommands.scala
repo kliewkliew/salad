@@ -4,6 +4,8 @@ package com.github.kliewkliew.salad.api.sync
 import com.github.kliewkliew.salad.serde.Serde
 import com.lambdaworks.redis.api.sync.RedisHashCommands
 
+import scala.util.Try
+
 /**
   * Wrap the lettuce API to provide an idiomatic Scala API.
   * @tparam EK The key storage encoding.
@@ -23,8 +25,8 @@ trait SaladHashSyncCommands[EK,EV,API] {
     */
   def hdel[DK](key: DK, field: DK)
               (implicit keySerde: Serde[DK,EK])
-  : Boolean =
-  underlying.hdel(keySerde.serialize(key), keySerde.serialize(field)) == 1
+  : Try[Boolean] =
+    Try(underlying.hdel(keySerde.serialize(key), keySerde.serialize(field))).map(_ == 1)
 
   /**
     * Get a field-value pair of a hash key.
@@ -38,9 +40,10 @@ trait SaladHashSyncCommands[EK,EV,API] {
     */
   def hget[DK,DV](key: DK, field: DK)
                  (implicit keySerde: Serde[DK,EK], valSerde: Serde[DV,EV])
-  : Option[DV] =
-  Option.apply(underlying.hget(keySerde.serialize(key), keySerde.serialize(field)))
-    .map(valSerde.deserialize)
+  : Try[Option[DV]] =
+    Try(
+      Option.apply(underlying.hget(keySerde.serialize(key), keySerde.serialize(field)))
+        .map(valSerde.deserialize))
 
   /**
     * Set a field-value pair for a hash key.
@@ -57,10 +60,12 @@ trait SaladHashSyncCommands[EK,EV,API] {
   def hset[DK,DV](key: DK, field: DK, value: DV,
                   nx: Boolean = false)
                  (implicit keySerde: Serde[DK,EK], valSerde: Serde[DV,EV])
-  : Boolean =
-  if (nx)
-    underlying.hsetnx(keySerde.serialize(key), keySerde.serialize(field), valSerde.serialize(value))
-  else
-    underlying.hset(keySerde.serialize(key), keySerde.serialize(field), valSerde.serialize(value))
+  : Try[Boolean] =
+    Try(
+      if (nx)
+        underlying.hsetnx(keySerde.serialize(key), keySerde.serialize(field), valSerde.serialize(value))
+      else
+        underlying.hset(keySerde.serialize(key), keySerde.serialize(field), valSerde.serialize(value))
+    )
 
 }

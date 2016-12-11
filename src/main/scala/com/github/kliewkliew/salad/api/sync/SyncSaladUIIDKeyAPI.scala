@@ -3,6 +3,8 @@ package com.github.kliewkliew.salad.api.sync
 import com.github.kliewkliew.salad.serde.Serde
 import com.lambdaworks.redis.api.sync._
 
+import scala.util.Try
+
 /**
   * Wrap the lettuce API to provide an idiomatic Scala API.
   * The unencoded input key is always a String to be encoded to a byte-array.
@@ -20,46 +22,46 @@ case class SyncSaladUIIDKeyAPI[API]
   import com.github.kliewkliew.salad.serde.ByteArraySerdes.stringSerde
 
   def del(key: String)
-  : Boolean =
+  : Try[Boolean] =
     api.del(key)
 
   def expire(key: String, ex: Long)
-  : Boolean =
+  : Try[Boolean] =
     api.expire(key, ex)
 
   def pexpire(key: String, px: Long)
-  : Boolean =
+  : Try[Boolean] =
     api.pexpire(key, px)
 
   def persist(key: String)
-  : Boolean =
+  : Try[Boolean] =
     api.persist(key)
 
   def get[DV](key: String)
              (implicit valSerde: Serde[DV,Array[Byte]])
-  : Option[DV] =
+  : Try[Option[DV]] =
     api.get(key)(stringSerde, valSerde)
 
   def set[DV](key: String, value: DV,
               ex: Option[Long] = None, px: Option[Long] = None,
               nx: Boolean = false, xx: Boolean = false)
              (implicit valSerde: Serde[DV,Array[Byte]])
-  : Boolean =
+  : Try[Boolean] =
     api.set(key, value, ex, px, nx, xx)(stringSerde, valSerde)
 
   def hdel(key: String, field: String)
-  : Boolean =
+  : Try[Boolean] =
     api.hdel(key, field)(stringSerde)
 
   def hget[DV](key: String, field: String)
               (implicit valSerde: Serde[DV,Array[Byte]])
-  : Option[DV] =
+  : Try[Option[DV]] =
     api.hget(key, field)(stringSerde, valSerde)
 
   def hset[DV](key: String, field: String, value: DV,
                nx: Boolean = false)
               (implicit valSerde: Serde[DV,Array[Byte]])
-  : Boolean =
+  : Try[Boolean] =
     api.hset(key, field, value, nx)(stringSerde, valSerde)
 
 }

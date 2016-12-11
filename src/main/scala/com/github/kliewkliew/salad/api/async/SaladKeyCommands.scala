@@ -1,11 +1,11 @@
 package com.github.kliewkliew.salad.api.async
 
 import FutureConverters._
-
 import com.github.kliewkliew.salad.serde.Serde
 import com.lambdaworks.redis.api.async.RedisKeyAsyncCommands
 
 import scala.concurrent.Future
+import scala.util.Try
 
 /**
   * Wrap the lettuce API to provide an idiomatic Scala API.
@@ -26,7 +26,7 @@ trait SaladKeyCommands[EK,EV,API] {
   def del[DK](key: DK)
              (implicit keySerde: Serde[DK,EK])
   : Future[Boolean] =
-    underlying.del(keySerde.serialize(key))
+    Try(underlying.del(keySerde.serialize(key))).toFuture
 
   /**
     * Set a key's TTL in seconds.
@@ -39,7 +39,7 @@ trait SaladKeyCommands[EK,EV,API] {
   def expire[DK](key: DK, ex: Long)
                 (implicit keySerde: Serde[DK,EK])
   : Future[Boolean] =
-    underlying.expire(keySerde.serialize(key), ex)
+    Try(underlying.expire(keySerde.serialize(key), ex)).toFuture
 
   /**
     * Set a key's TTL in milliseconds.
@@ -52,7 +52,7 @@ trait SaladKeyCommands[EK,EV,API] {
   def pexpire[DK](key: DK, px: Long)
                  (implicit keySerde: Serde[DK,EK])
   : Future[Boolean] =
-    underlying.pexpire(keySerde.serialize(key), px)
+    Try(underlying.pexpire(keySerde.serialize(key), px)).toFuture
 
   /**
     * Remove the expiry from a key.
@@ -64,6 +64,6 @@ trait SaladKeyCommands[EK,EV,API] {
   def persist[DK](key: DK)
                  (implicit keySerde: Serde[DK,EK])
   : Future[Boolean] =
-    underlying.persist(keySerde.serialize(key))
+    Try(underlying.persist(keySerde.serialize(key))).toFuture
 
 }

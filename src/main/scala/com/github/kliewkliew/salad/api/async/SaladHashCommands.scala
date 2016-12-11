@@ -1,12 +1,12 @@
 package com.github.kliewkliew.salad.api.async
 
 import FutureConverters._
-
 import com.github.kliewkliew.salad.serde.Serde
 import com.lambdaworks.redis.api.async.RedisHashAsyncCommands
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.Try
 
 /**
   * Wrap the lettuce API to provide an idiomatic Scala API.
@@ -28,7 +28,7 @@ trait SaladHashCommands[EK,EV,API] {
   def hdel[DK](key: DK, field: DK)
               (implicit keySerde: Serde[DK,EK])
   : Future[Boolean] =
-    underlying.hdel(keySerde.serialize(key), keySerde.serialize(field))
+    Try(underlying.hdel(keySerde.serialize(key), keySerde.serialize(field))).toFuture
 
   /**
     * Get a field-value pair of a hash key.
@@ -43,7 +43,7 @@ trait SaladHashCommands[EK,EV,API] {
   def hget[DK,DV](key: DK, field: DK)
                  (implicit keySerde: Serde[DK,EK], valSerde: Serde[DV,EV])
   : Future[Option[DV]] =
-    underlying.hget(keySerde.serialize(key), keySerde.serialize(field))
+    Try(underlying.hget(keySerde.serialize(key), keySerde.serialize(field))).toFuture
       .map(value => Option.apply(value)
         .map(valSerde.deserialize))
 
@@ -63,9 +63,11 @@ trait SaladHashCommands[EK,EV,API] {
                   nx: Boolean = false)
                  (implicit keySerde: Serde[DK,EK], valSerde: Serde[DV,EV])
   : Future[Boolean] =
-  if (nx)
-    underlying.hsetnx(keySerde.serialize(key), keySerde.serialize(field), valSerde.serialize(value))
-  else
-    underlying.hset(keySerde.serialize(key), keySerde.serialize(field), valSerde.serialize(value))
+    Try(
+      if (nx)
+        underlying.hsetnx(keySerde.serialize(key), keySerde.serialize(field), valSerde.serialize(value))
+      else
+        underlying.hset(keySerde.serialize(key), keySerde.serialize(field), valSerde.serialize(value))
+    ).toFuture
 
 }

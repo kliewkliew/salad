@@ -6,6 +6,7 @@ import scala.compat.java8.FutureConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.language.implicitConversions
+import scala.util.{Failure, Success, Try}
 
 object FutureConverters {
 
@@ -34,6 +35,19 @@ object FutureConverters {
     */
   implicit class RedisFutureStringToFutureScalaBoolean(in: RedisFuture[String]) {
     def isOK: Future[Boolean] = in.map(_ == "OK")
+  }
+  implicit class FutureStringToFutureBoolean(in: Future[String]) {
+    def isOK: Future[Boolean] = in.map(_ == "OK")
+  }
+
+  implicit class TryToFuture[J](in: Try[RedisFuture[J]]) {
+    def toFuture: Future[J] =
+      in match {
+        case Success(future) =>
+          future
+        case Failure(t) =>
+          Future.failed(t)
+      }
   }
 
 }
