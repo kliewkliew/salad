@@ -1,5 +1,7 @@
 package com.github.kliewkliew.salad.api.async
 
+import java.net.InetAddress
+
 import FutureConverters._
 import com.lambdaworks.redis.RedisURI
 import com.lambdaworks.redis.cluster.api.async.RedisClusterAsyncCommands
@@ -32,7 +34,9 @@ trait SaladClusterCommands[EK,EV,API] {
     * @return Future(Unit) on "OK", else Future.failed(exception)
     */
   def clusterMeet(redisURI: RedisURI): Future[Unit] = {
-    val met = Try(underlying.clusterMeet(redisURI.getHost, redisURI.getPort)).toFuture.isOK
+    val met = Try(underlying.clusterMeet(
+      InetAddress.getByName(redisURI.getHost).getHostAddress, // Hostname will not work; use the IP address
+      redisURI.getPort)).toFuture.isOK
     met.onSuccess { case result => logger.info(s"Added node to cluser: $redisURI") }
     met.onFailure { case e => logger.warn(s"Failed to add node to cluster: $redisURI", e) }
     met
