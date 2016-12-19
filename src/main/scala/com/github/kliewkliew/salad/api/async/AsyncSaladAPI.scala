@@ -1,6 +1,7 @@
 package com.github.kliewkliew.salad.api.async
 
 import com.lambdaworks.redis.api.async._
+import com.lambdaworks.redis.cluster.api.async.RedisClusterAsyncCommands
 
 /**
   * Wrap the lettuce API to provide an idiomatic Scala API.
@@ -11,11 +12,13 @@ import com.lambdaworks.redis.api.async._
   */
 case class AsyncSaladAPI[EK,EV,API]
 (underlying: API
+  with RedisClusterAsyncCommands[EK,EV]
   with RedisHashAsyncCommands[EK,EV]
   with RedisKeyAsyncCommands[EK,EV]
   with RedisStringAsyncCommands[EK,EV]
 )
-  extends SaladHashCommands[EK,EV,API]
+  extends SaladClusterCommands[EK,EV,API]
+    with SaladHashCommands[EK,EV,API]
     with SaladKeyCommands[EK,EV,API]
     with SaladStringCommands[EK,EV,API]
 {

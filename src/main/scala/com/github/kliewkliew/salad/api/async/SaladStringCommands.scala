@@ -52,7 +52,7 @@ trait SaladStringCommands[EK,EV,API] {
                  ex: Option[Long] = None, px: Option[Long] = None,
                  nx: Boolean = false, xx: Boolean = false)
                 (implicit keySerde: Serde[DK,EK], valSerde: Serde[DV,EV])
-  : Future[Boolean] = {
+  : Future[Unit] = {
     val args = new SetArgs
     ex.map(args.ex)
     px.map(args.px)

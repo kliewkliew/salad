@@ -2,6 +2,7 @@ package com.github.kliewkliew.salad.api.async
 
 import com.github.kliewkliew.salad.serde.Serde
 import com.lambdaworks.redis.api.async._
+import com.lambdaworks.redis.cluster.api.async.RedisClusterAsyncCommands
 
 import scala.concurrent.Future
 
@@ -15,6 +16,7 @@ import scala.concurrent.Future
   */
 case class AsyncSaladStringKeyAPI[EK,EV,API]
 (underlying: API
+  with RedisClusterAsyncCommands[EK,EV]
   with RedisHashAsyncCommands[EK,EV]
   with RedisKeyAsyncCommands[EK,EV]
   with RedisStringAsyncCommands[EK,EV]
@@ -50,7 +52,7 @@ case class AsyncSaladStringKeyAPI[EK,EV,API]
               ex: Option[Long] = None, px: Option[Long] = None,
               nx: Boolean = false, xx: Boolean = false)
              (implicit keySerde: Serde[String,EK], valSerde: Serde[DV,EV])
-  : Future[Boolean] =
+  : Future[Unit] =
     api.set(key, value, ex, px, nx, xx)
 
   def hdel(key: String, field: String)

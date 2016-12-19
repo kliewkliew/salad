@@ -1,7 +1,7 @@
 name := "salad"
 organization := "com.github.kliewkliew"
 
-version := "0.9.11"
+version := "0.9.12"
 
 scalaVersion := "2.11.8"
 
