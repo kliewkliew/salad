@@ -73,17 +73,6 @@ trait SaladClusterCommands[EK,EV,API] {
     }
 
   /**
-    * Get the information of one node in the cluster.
-    * @param redisURI
-    * @return
-    */
-  def getNode(redisURI: RedisURI): RedisClusterNode = {
-    val node = new RedisClusterNode
-    node.setUri(redisURI)
-    node
-  }
-
-  /**
     * Get a list of nodes in the cluster.
     * @return
     */
