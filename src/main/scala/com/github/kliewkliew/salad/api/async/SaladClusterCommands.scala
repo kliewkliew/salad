@@ -1,12 +1,11 @@
 package com.github.kliewkliew.salad.api.async
 
-import java.net.URI
-
 import FutureConverters._
 import com.lambdaworks.redis.RedisURI
 import com.lambdaworks.redis.cluster.api.async.RedisClusterAsyncCommands
 import com.lambdaworks.redis.cluster.models.partitions.{ClusterPartitionParser, RedisClusterNode}
 import com.lambdaworks.redis.models.role.RedisInstance.Role
+import org.slf4j.LoggerFactory
 
 import collection.JavaConverters._
 import scala.collection.mutable
@@ -24,34 +23,59 @@ import scala.util.Try
 trait SaladClusterCommands[EK,EV,API] {
   def underlying: API with RedisClusterAsyncCommands[EK,EV]
 
+  val logger = LoggerFactory.getLogger(this.getClass)
+
   /**
+    * Invoke the underlying methods with additional logging.
     *
     * @see RedisClusterAsyncCommands for javadocs per method.
     * @return Future(Unit) on "OK", else Future.failed(exception)
     */
-  def clusterMeet(ip: String, port: Int): Future[Unit] =
-    Try(underlying.clusterMeet(ip, port)).toFuture.isOK
+  def clusterMeet(redisURI: RedisURI): Future[Unit] = {
+    val met = Try(underlying.clusterMeet(redisURI.getHost, redisURI.getPort)).toFuture.isOK
+    met.onSuccess { case result => logger.info(s"Added node to cluser: $redisURI") }
+    met.onFailure { case e => logger.warn(s"Failed to add node to cluster: $redisURI", e) }
+    met
+  }
 
-  def clusterForget(nodeId: String): Future[Unit] =
-    Try(underlying.clusterForget(nodeId)).toFuture.isOK
+  def clusterForget(nodeId: String): Future[Unit] = {
+    val forgot = Try(underlying.clusterForget(nodeId)).toFuture.isOK
+    forgot.onSuccess { case result => logger.info(s"Remove node from cluser: $nodeId") }
+    forgot.onFailure { case e => logger.warn(s"Failed to remove node from cluster: $nodeId", e) }
+    forgot
+  }
 
-  def clusterSetSlotNode(slot: Int, nodeId: String): Future[Unit] =
-    Try(underlying.clusterSetSlotNode(slot, nodeId)).toFuture.isOK
+  def clusterSetSlotNode(slot: Int, nodeId: String): Future[Unit] = {
+    val sat = Try(underlying.clusterSetSlotNode(slot, nodeId)).toFuture.isOK
+    sat.onSuccess { case result => logger.trace(s"Set slot $slot to node $nodeId") }
+    sat.onFailure { case e => logger.warn(s"Failed to set slot $slot to node $nodeId", e) }
+    sat
+  }
 
   def clusterReplicate(nodeId: String): Future[Unit] =
-    Try(underlying.clusterReplicate(nodeId)).toFuture.isOK
+    Try(underlying.clusterMyId()).toFuture.flatMap { replicaId =>
+      val replicated = Try(underlying.clusterReplicate(nodeId)).toFuture.isOK
+      replicated.onSuccess { case result => logger.info(s"$replicaId replicates $nodeId") }
+      replicated.onFailure { case e => logger.warn(s"Failed to add $replicaId as a slave replicating $nodeId", e) }
+      replicated
+    }
 
   def clusterFailover(force: Boolean): Future[Unit] =
-    Try(underlying.clusterFailover(force)).toFuture.isOK
+    Try(underlying.clusterMyId()).toFuture.flatMap { newMaster =>
+      val failover = Try(underlying.clusterFailover(force)).toFuture.isOK
+      failover.onSuccess { case result => logger.info(s"Failover to $newMaster") }
+      failover.onFailure { case e => logger.warn(s"Failed to failover to $newMaster", e) }
+      failover
+    }
 
   /**
     * Get the information of one node in the cluster.
-    * @param uRI
+    * @param redisURI
     * @return
     */
-  def node(uRI: URI): RedisClusterNode = {
+  def getNode(redisURI: RedisURI): RedisClusterNode = {
     val node = new RedisClusterNode
-    node.setUri(RedisURI.create(uRI.getHost, uRI.getPort))
+    node.setUri(redisURI)
     node
   }
 
@@ -69,4 +93,5 @@ trait SaladClusterCommands[EK,EV,API] {
     clusterNodes.map(_.filter(Role.SLAVE == _.getRole))
   def slaveNodes(amongNodes: mutable.Buffer[RedisClusterNode]): mutable.Buffer[RedisClusterNode] =
     amongNodes.filter(Role.SLAVE == _.getRole)
+
 }
