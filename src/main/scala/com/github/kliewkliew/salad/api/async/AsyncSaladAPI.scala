@@ -21,6 +21,16 @@ case class AsyncSaladAPI[EK,EV,API]
     with SaladHashCommands[EK,EV,API]
     with SaladKeyCommands[EK,EV,API]
     with SaladStringCommands[EK,EV,API]
-{
-  // Nothing
-}
+
+/**
+  * Wrap the lettuce cluster API.
+  * Useful when after calling getConnection to connect to a single node.
+  *
+  * @example def getConnection(redisURI: RedisURI): Try[SaladClusterAPI[String,String]] =
+  *          Try(saladAPI.underlying.getConnection(redisURI.getHost, redisURI.getPort)).map(SaladClusterAPI(_))
+  * @param underlying The lettuce async API to be wrapped.
+  * @tparam EK The key storage encoding.
+  * @tparam EV The value storage encoding.
+  */
+case class SaladClusterAPI[EK,EV](underlying: RedisClusterAsyncCommands[EK,EV])
+  extends SaladClusterCommands[EK,EV,RedisClusterAsyncCommands[EK,EV]]
