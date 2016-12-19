@@ -65,12 +65,15 @@ trait SaladClusterCommands[EK,EV,API] {
     }
 
   def clusterFailover(force: Boolean): Future[Unit] =
-    Try(underlying.clusterMyId()).toFuture.flatMap { newMaster =>
+    clusterMyId.flatMap { newMaster =>
       val failover = Try(underlying.clusterFailover(force)).toFuture.isOK
       failover.onSuccess { case result => logger.info(s"Failover to $newMaster") }
       failover.onFailure { case e => logger.warn(s"Failed to failover to $newMaster", e) }
       failover
     }
+
+  def clusterMyId: Future[String] =
+    Try(underlying.clusterMyId).toFuture
 
   /**
     * Get a list of nodes in the cluster.
