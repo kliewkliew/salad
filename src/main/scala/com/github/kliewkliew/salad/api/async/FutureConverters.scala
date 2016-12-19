@@ -33,30 +33,22 @@ object FutureConverters {
     * must be invoked manually.
     *   ie. saladAPI.api.clusterReplicate(poorestMaster).isOK
     */
-  // For simple-string-reply, we get either success or an exception
-  // which maps to either Future.success or Future.failed
-  implicit class RedisFutureStringToFutureUnit(in: RedisFuture[String]) {
-    def isOK: Future[Unit] = in.map {
-      case "OK" => Future.successful(Unit)
-      case _ => Future.failed(new Exception("Not OK"))
-    }
-  }
-  implicit class FutureStringToFutureUnit(in: Future[String]) {
-    def isOK: Future[Unit] = in.map {
-      case "OK" => Future.successful(Unit)
-      case _ => Future.failed(new Exception("Not OK"))
-    }
-  }
 
   // Ensure that unchecked exceptions can be mapped over.
   implicit class TryToFuture[J](in: Try[RedisFuture[J]]) {
-    def toFuture: Future[J] =
-      in match {
-        case Success(future) =>
-          future
-        case Failure(t) =>
-          Future.failed(t)
-      }
+    def toFuture: Future[J] = in match {
+      case Success(future) => future
+      case Failure(t) => Future.failed(t)
+    }
+  }
+
+  // For simple-string-reply, we get either success or an exception
+  // which maps to either Future.success or Future.failed
+  implicit class FutureStringToFutureUnit(in: Future[String]) {
+    def isOK: Future[Unit] = in.map {
+      case "OK" => Future.successful(Unit)
+      case err => Future.failed(new Exception(err))
+    }
   }
 
 }
