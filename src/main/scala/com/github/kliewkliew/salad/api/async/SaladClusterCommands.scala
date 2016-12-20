@@ -44,7 +44,7 @@ trait SaladClusterCommands[EK,EV,API] {
 
   def clusterForget(nodeId: String): Future[Unit] = {
     val forgot = Try(underlying.clusterForget(nodeId)).toFuture.isOK
-    forgot.onSuccess { case result => logger.info(s"Remove node from cluser: $nodeId") }
+    forgot.onSuccess { case result => logger.info(s"Removed node from cluser: $nodeId") }
     forgot.onFailure { case e => logger.warn(s"Failed to remove node from cluster: $nodeId", e) }
     forgot
   }
@@ -70,6 +70,14 @@ trait SaladClusterCommands[EK,EV,API] {
       failover.onSuccess { case result => logger.info(s"Failover to $newMaster") }
       failover.onFailure { case e => logger.warn(s"Failed to failover to $newMaster", e) }
       failover
+    }
+
+  def clusterReset(hard: Boolean): Future[Unit] =
+    clusterMyId.flatMap { oldId =>
+      val reset = Try(underlying.clusterReset(hard)).toFuture.isOK
+      reset.onSuccess { case result => logger.info(s"Reset node: $oldId") }
+      reset.onFailure { case e => logger.warn(s"Failed to reset node: $oldId", e) }
+      reset
     }
 
   def clusterMyId: Future[String] =
