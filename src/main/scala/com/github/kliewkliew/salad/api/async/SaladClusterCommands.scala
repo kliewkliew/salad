@@ -44,15 +44,17 @@ trait SaladClusterCommands[EK,EV,API] {
 
   def clusterForget(nodeId: String): Future[Unit] = {
     val forgot = Try(underlying.clusterForget(nodeId)).toFuture.isOK
-    forgot.onSuccess { case result => logger.info(s"Removed node from cluser: $nodeId") }
-    forgot.onFailure { case e => logger.warn(s"Failed to remove node from cluster: $nodeId", e) }
+    clusterMyId.map { executorId =>
+      forgot.onSuccess { case result => logger.info(s"Forgot $nodeId from $executorId") }
+      forgot.onFailure { case e => logger.warn(s"Failed to forget $nodeId from $executorId", e) }
+    }
     forgot
   }
 
   def clusterSetSlotNode(slot: Int, nodeId: String): Future[Unit] = {
     val sat = Try(underlying.clusterSetSlotNode(slot, nodeId)).toFuture.isOK
-    sat.onSuccess { case result => logger.trace(s"Set slot $slot to node $nodeId") }
-    sat.onFailure { case e => logger.trace(s"Failed to set slot $slot to node $nodeId", e) }
+    sat.onSuccess { case result => logger.trace(s"Assigned slot $slot to $nodeId") }
+    sat.onFailure { case e => logger.trace(s"Failed to assign slot $slot to $nodeId", e) }
     sat
   }
 
@@ -60,7 +62,7 @@ trait SaladClusterCommands[EK,EV,API] {
     Try(underlying.clusterMyId()).toFuture.flatMap { replicaId =>
       val replicated = Try(underlying.clusterReplicate(nodeId)).toFuture.isOK
       replicated.onSuccess { case result => logger.info(s"$replicaId replicates $nodeId") }
-      replicated.onFailure { case e => logger.warn(s"Failed to add $replicaId as a slave replicating $nodeId", e) }
+      replicated.onFailure { case e => logger.warn(s"Failed to set $replicaId to replicate $nodeId", e) }
       replicated
     }
 
