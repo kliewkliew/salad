@@ -52,7 +52,7 @@ trait SaladClusterCommands[EK,EV,API] {
   def clusterSetSlotNode(slot: Int, nodeId: String): Future[Unit] = {
     val sat = Try(underlying.clusterSetSlotNode(slot, nodeId)).toFuture.isOK
     sat.onSuccess { case result => logger.trace(s"Set slot $slot to node $nodeId") }
-    sat.onFailure { case e => logger.warn(s"Failed to set slot $slot to node $nodeId", e) }
+    sat.onFailure { case e => logger.trace(s"Failed to set slot $slot to node $nodeId", e) }
     sat
   }
 
