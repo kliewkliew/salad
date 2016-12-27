@@ -58,6 +58,27 @@ trait SaladClusterCommands[EK,EV,API] {
     sat
   }
 
+  def clusterSetSlotStable(slot: Int): Future[Unit] = {
+    val sat = Try(underlying.clusterSetSlotStable(slot)).toFuture.isOK
+    sat.onSuccess { case result => logger.trace(s"Stabilized slot $slot") }
+    sat.onFailure { case e => logger.trace(s"Failed to stabilize slot $slot", e) }
+    sat
+  }
+
+  def clusterSetSlotMigrating(slot: Int, nodeId: String): Future[Unit] = {
+    val sat = Try(underlying.clusterSetSlotMigrating(slot, nodeId)).toFuture.isOK
+    sat.onSuccess { case result => logger.trace(s"Migrating slot $slot to $nodeId") }
+    sat.onFailure { case e => logger.trace(s"Failed to migrate slot $slot to $nodeId", e) }
+    sat
+  }
+
+  def clusterSetSlotImporting(slot: Int, nodeId: String): Future[Unit] = {
+    val sat = Try(underlying.clusterSetSlotImporting(slot, nodeId)).toFuture.isOK
+    sat.onSuccess { case result => logger.trace(s"Importing slot $slot from $nodeId") }
+    sat.onFailure { case e => logger.trace(s"Failed to import slot $slot from $nodeId", e) }
+    sat
+  }
+
   def clusterReplicate(nodeId: String): Future[Unit] =
     Try(underlying.clusterMyId()).toFuture.flatMap { replicaId =>
       val replicated = Try(underlying.clusterReplicate(nodeId)).toFuture.isOK
