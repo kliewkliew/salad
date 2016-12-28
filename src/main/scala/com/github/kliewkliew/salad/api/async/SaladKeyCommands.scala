@@ -44,23 +44,6 @@ trait SaladKeyCommands[EK,EV,API] {
     Try(underlying.expire(keySerde.serialize(key), ex)).toFuture
 
   /**
-    * Atomically transfer a key from a Redis instance to another one.
-    * @param host The destination host.
-    * @param port The destination port.
-    * @param key The key to migrate.
-    * @param db The destination database.
-    * @param timeout The timeout in milliseconds.
-    * @param keySerde The serde to encode the key.
-    * @tparam DK The unencoded key type.
-    * @return A Future indicating success.
-    */
-  def migrate[DK](host: String, timeout: Long, key: DK,
-                  port: Int = 6379, db: Int = 0)
-             (implicit keySerde: Serde[DK,EK])
-  : Future[Unit] =
-    Try(underlying.migrate(host, port, keySerde.serialize(key), db, timeout)).toFuture.isOK
-
-  /**
     * Atomically transfer one or more keys from a Redis instance to another one.
     * @param host The destination host.
     * @param port The destination port.
@@ -73,8 +56,8 @@ trait SaladKeyCommands[EK,EV,API] {
     * @tparam DK The unencoded key type.
     * @return A Future indicating success.
     */
-  def migrate[DK](host: String, timeout: Long, keys: List[DK],
-                  port: Int = 6379, db: Int = 0,
+  def migrate[DK](host: String, keys: List[DK],
+                  port: Int = 6379, db: Int = 0, timeout: Long = 5000,
                   copy: Boolean = false, replace: Boolean = false)
                  (implicit keySerde: Serde[DK,EK])
   : Future[Unit] = {

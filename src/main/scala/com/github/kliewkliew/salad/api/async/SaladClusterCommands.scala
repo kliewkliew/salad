@@ -92,7 +92,7 @@ trait SaladClusterCommands[EK,EV,API] {
   }
 
   def clusterCountKeysInSlot(slot: Int): Future[Long] = {
-    val count = Try(underlying.clusterCountKeysInSlot(slot)).toFuture//.map(_.toLong)
+    val count = Try(underlying.clusterCountKeysInSlot(slot)).toFuture
     count.onSuccess { case result => logger.trace(s"$count keys in slot $slot") }
     count.onFailure { case e => logger.trace(s"Failed to count keys in slot $slot", e) }
     count
