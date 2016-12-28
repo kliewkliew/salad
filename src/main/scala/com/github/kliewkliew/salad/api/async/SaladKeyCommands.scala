@@ -54,7 +54,8 @@ trait SaladKeyCommands[EK,EV,API] {
     * @tparam DK The unencoded key type.
     * @return A Future indicating success.
     */
-  def migrate[DK](host: String, port: Int, key: DK, db: Int, timeout: Long)
+  def migrate[DK](host: String, timeout: Long, key: DK,
+                  port: Int = 6379, db: Int = 0)
              (implicit keySerde: Serde[DK,EK])
   : Future[Unit] =
     Try(underlying.migrate(host, port, keySerde.serialize(key), db, timeout)).toFuture.isOK
@@ -72,7 +73,9 @@ trait SaladKeyCommands[EK,EV,API] {
     * @tparam DK The unencoded key type.
     * @return A Future indicating success.
     */
-  def migrate[DK](host: String, port: Int, db: Int, timeout: Long, copy: Boolean, replace: Boolean, keys: List[DK])
+  def migrate[DK](host: String, timeout: Long, keys: List[DK],
+                  port: Int = 6379, db: Int = 0,
+                  copy: Boolean = false, replace: Boolean = false)
                  (implicit keySerde: Serde[DK,EK])
   : Future[Unit] = {
     val encodedKeys = keys.map(keySerde.serialize).asJava
