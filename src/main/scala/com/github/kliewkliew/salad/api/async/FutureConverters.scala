@@ -28,6 +28,11 @@ object FutureConverters {
   implicit def FutureJavaLongToFutureScalaBoolean(in: Future[java.lang.Long]): Future[Boolean] =
     in.map(_ == 1)
 
+  implicit def RedisFutureJavaLongToFutureScalaLong(in: RedisFuture[java.lang.Long]): Future[Long] =
+    in.toScala
+  implicit def FutureJavaLongToFutureScalaLong(in: Future[java.lang.Long]): Future[Long] =
+    in.map(_.toLong)
+
   /**
     * These implicits are apt to cause compiler problems so they are implemented as wrappers that
     * must be invoked manually.

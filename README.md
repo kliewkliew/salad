@@ -7,6 +7,9 @@ CompactByteArraySerdes and SnappySerdes will also compact numeric values to the 
 Single-node Redis, master-slave Sentinel configurations, and sharded Redis Cluster configurations are supported.
 Notably, this is the first Scala client to support Redis Cluster *and* provide an asynchronous API together in one package.
 
+Salad also ensures that all exceptions thrown by lettuce can be mapped over in Scala futures.
+If you used lettuce directly, exceptions in lettuce would not trigger `Future.failed` in Scala.
+
 # Usage
 There are wrappers for the both the asynchronous and synchronous API.
 

@@ -3,14 +3,15 @@ package com.github.kliewkliew.salad.api.async
 import java.net.InetAddress
 
 import FutureConverters._
+import com.github.kliewkliew.salad.serde.Serde
 import com.lambdaworks.redis.RedisURI
 import com.lambdaworks.redis.cluster.api.async.RedisClusterAsyncCommands
 import com.lambdaworks.redis.cluster.models.partitions.{ClusterPartitionParser, RedisClusterNode}
 import com.lambdaworks.redis.models.role.RedisInstance.Role
 import org.slf4j.LoggerFactory
 
-import collection.JavaConverters._
 import scala.collection.mutable
+import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.Try
@@ -77,6 +78,24 @@ trait SaladClusterCommands[EK,EV,API] {
     sat.onSuccess { case result => logger.trace(s"Importing slot $slot from $nodeId") }
     sat.onFailure { case e => logger.trace(s"Failed to import slot $slot from $nodeId", e) }
     sat
+  }
+
+  def clusterGetKeysInSlot[DK](slot: Int, count: Int)
+                          (implicit keySerde: Serde[DK,EK]): Future[mutable.Buffer[DK]] = {
+    val encodedKeys = Try(underlying.clusterGetKeysInSlot(slot, count)).toFuture
+    val decodedKeys = encodedKeys.map { keyList => keyList.asScala.map { key =>
+      keySerde.deserialize(key)
+    }}
+    decodedKeys.onSuccess { case result => logger.trace(s"Keys for slot $slot are $result") }
+    decodedKeys.onFailure { case e => logger.error(s"Failed to get keys for slot $slot", e) }
+    decodedKeys
+  }
+
+  def clusterCountKeysInSlot(slot: Int): Future[Long] = {
+    val count = Try(underlying.clusterCountKeysInSlot(slot)).toFuture//.map(_.toLong)
+    count.onSuccess { case result => logger.trace(s"$count keys in slot $slot") }
+    count.onFailure { case e => logger.trace(s"Failed to count keys in slot $slot", e) }
+    count
   }
 
   def clusterReplicate(nodeId: String): Future[Unit] =

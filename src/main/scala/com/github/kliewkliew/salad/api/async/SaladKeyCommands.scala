@@ -2,8 +2,10 @@ package com.github.kliewkliew.salad.api.async
 
 import FutureConverters._
 import com.github.kliewkliew.salad.serde.Serde
+import com.lambdaworks.redis.MigrateArgs
 import com.lambdaworks.redis.api.async.RedisKeyAsyncCommands
 
+import scala.collection.JavaConverters._
 import scala.concurrent.Future
 import scala.util.Try
 
@@ -40,6 +42,46 @@ trait SaladKeyCommands[EK,EV,API] {
                 (implicit keySerde: Serde[DK,EK])
   : Future[Boolean] =
     Try(underlying.expire(keySerde.serialize(key), ex)).toFuture
+
+  /**
+    * Atomically transfer a key from a Redis instance to another one.
+    * @param host The destination host.
+    * @param port The destination port.
+    * @param key The key to migrate.
+    * @param db The destination database.
+    * @param timeout The timeout in milliseconds.
+    * @param keySerde The serde to encode the key.
+    * @tparam DK The unencoded key type.
+    * @return A Future indicating success.
+    */
+  def migrate[DK](host: String, port: Int, key: DK, db: Int, timeout: Long)
+             (implicit keySerde: Serde[DK,EK])
+  : Future[Unit] =
+    Try(underlying.migrate(host, port, keySerde.serialize(key), db, timeout)).toFuture.isOK
+
+  /**
+    * Atomically transfer one or more keys from a Redis instance to another one.
+    * @param host The destination host.
+    * @param port The destination port.
+    * @param db The destination database.
+    * @param timeout The timeout in milliseconds.
+    * @param copy Do not remove the key from the local instance.
+    * @param replace Replace existing key on the remote instance.
+    * @param keys The list of keys to migrate.
+    * @param keySerde The serde to encode the key.
+    * @tparam DK The unencoded key type.
+    * @return A Future indicating success.
+    */
+  def migrate[DK](host: String, port: Int, db: Int, timeout: Long, copy: Boolean, replace: Boolean, keys: List[DK])
+                 (implicit keySerde: Serde[DK,EK])
+  : Future[Unit] = {
+    val encodedKeys = keys.map(keySerde.serialize).asJava
+    val args = MigrateArgs.Builder.keys(encodedKeys)
+    if (copy) args.copy()
+    if (replace) args.replace()
+
+    Try(underlying.migrate(host, port, db, timeout, args)).toFuture.isOK
+  }
 
   /**
     * Set a key's TTL in milliseconds.
