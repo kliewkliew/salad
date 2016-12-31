@@ -26,7 +26,7 @@ import scala.util.Try
 trait SaladClusterCommands[EK,EV,API] {
   def underlying: API with RedisClusterAsyncCommands[EK,EV]
 
-  val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger = LoggerFactory.getLogger(this.getClass)
 
   /**
     * Invoke the underlying methods with additional logging.

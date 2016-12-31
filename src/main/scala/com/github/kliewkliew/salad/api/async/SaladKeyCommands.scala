@@ -4,6 +4,7 @@ import FutureConverters._
 import com.github.kliewkliew.salad.serde.Serde
 import com.lambdaworks.redis.MigrateArgs
 import com.lambdaworks.redis.api.async.RedisKeyAsyncCommands
+import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Future
@@ -17,6 +18,8 @@ import scala.util.Try
   */
 trait SaladKeyCommands[EK,EV,API] {
   def underlying: API with RedisKeyAsyncCommands[EK,EV]
+
+  private val logger = LoggerFactory.getLogger(this.getClass)
 
   /**
     * Delete a key-value pair.
@@ -65,6 +68,8 @@ trait SaladKeyCommands[EK,EV,API] {
     val args = MigrateArgs.Builder.keys(encodedKeys)
     if (copy) args.copy()
     if (replace) args.replace()
+
+    logger.trace(s"Migrating to $host:$port/$db keys: $keys")
 
     Try(underlying.migrate(host, port, db, timeout, args)).toFuture.isOK
   }
