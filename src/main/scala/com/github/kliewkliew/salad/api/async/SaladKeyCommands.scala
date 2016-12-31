@@ -2,11 +2,12 @@ package com.github.kliewkliew.salad.api.async
 
 import FutureConverters._
 import com.github.kliewkliew.salad.serde.Serde
-import com.lambdaworks.redis.MigrateArgs
+import com.lambdaworks.redis.{MigrateArgs, RedisURI}
 import com.lambdaworks.redis.api.async.RedisKeyAsyncCommands
 import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConverters._
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.Try
 
@@ -48,9 +49,7 @@ trait SaladKeyCommands[EK,EV,API] {
 
   /**
     * Atomically transfer one or more keys from a Redis instance to another one.
-    * @param host The destination host.
-    * @param port The destination port.
-    * @param db The destination database.
+    * @param redisURI The destination URI.
     * @param timeout The timeout in milliseconds.
     * @param copy Do not remove the key from the local instance.
     * @param replace Replace existing key on the remote instance.
@@ -59,19 +58,22 @@ trait SaladKeyCommands[EK,EV,API] {
     * @tparam DK The unencoded key type.
     * @return A Future indicating success.
     */
-  def migrate[DK](host: String, keys: List[DK],
-                  port: Int = 6379, db: Int = 0, timeout: Long = 5000,
+  def migrate[DK](redisURI: RedisURI, keys: List[DK], timeout: Long = 5000,
                   copy: Boolean = false, replace: Boolean = false)
                  (implicit keySerde: Serde[DK,EK])
   : Future[Unit] = {
+    val host = redisURI.getHost
+    val port = redisURI.getPort
+    val db = Option.apply(redisURI.getDatabase).getOrElse(0)
     val encodedKeys = keys.map(keySerde.serialize).asJava
     val args = MigrateArgs.Builder.keys(encodedKeys)
     if (copy) args.copy()
     if (replace) args.replace()
 
-    logger.trace(s"Migrating to $host:$port/$db keys: $keys")
-
-    Try(underlying.migrate(host, port, db, timeout, args)).toFuture.isOK
+    val migrated = Try(underlying.migrate(host, port, db, timeout, args)).toFuture.isOK
+    migrated.onSuccess{case _ => logger.trace(s"Migrating to $redisURI keys: $keys")}
+    migrated.onFailure{case e => logger.warn(s"Failed to migrate to $redisURI keys: $keys")}
+    migrated
   }
 
   /**

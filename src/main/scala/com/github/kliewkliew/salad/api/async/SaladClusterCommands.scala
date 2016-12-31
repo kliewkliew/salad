@@ -38,7 +38,7 @@ trait SaladClusterCommands[EK,EV,API] {
     val met = Try(underlying.clusterMeet(
       InetAddress.getByName(redisURI.getHost).getHostAddress, // Hostname will not work; use the IP address
       redisURI.getPort)).toFuture.isOK
-    met.onSuccess { case result => logger.info(s"Added node to cluser: $redisURI") }
+    met.onSuccess { case _ => logger.info(s"Added node to cluser: $redisURI") }
     met.onFailure { case e => logger.warn(s"Failed to add node to cluster: $redisURI", e) }
     met
   }
@@ -46,7 +46,7 @@ trait SaladClusterCommands[EK,EV,API] {
   def clusterForget(nodeId: String): Future[Unit] = {
     val forgot = Try(underlying.clusterForget(nodeId)).toFuture.isOK
     clusterMyId.map { executorId =>
-      forgot.onSuccess { case result => logger.info(s"Forgot $nodeId from $executorId") }
+      forgot.onSuccess { case _ => logger.info(s"Forgot $nodeId from $executorId") }
       forgot.onFailure { case e => logger.warn(s"Failed to forget $nodeId from $executorId", e) }
     }
     forgot
@@ -54,28 +54,28 @@ trait SaladClusterCommands[EK,EV,API] {
 
   def clusterSetSlotNode(slot: Int, nodeId: String): Future[Unit] = {
     val sat = Try(underlying.clusterSetSlotNode(slot, nodeId)).toFuture.isOK
-    sat.onSuccess { case result => logger.trace(s"Assigned slot $slot to $nodeId") }
+    sat.onSuccess { case _ => logger.trace(s"Assigned slot $slot to $nodeId") }
     sat.onFailure { case e => logger.trace(s"Failed to assign slot $slot to $nodeId", e) }
     sat
   }
 
   def clusterSetSlotStable(slot: Int): Future[Unit] = {
     val sat = Try(underlying.clusterSetSlotStable(slot)).toFuture.isOK
-    sat.onSuccess { case result => logger.trace(s"Stabilized slot $slot") }
+    sat.onSuccess { case _ => logger.trace(s"Stabilized slot $slot") }
     sat.onFailure { case e => logger.trace(s"Failed to stabilize slot $slot", e) }
     sat
   }
 
   def clusterSetSlotMigrating(slot: Int, nodeId: String): Future[Unit] = {
     val sat = Try(underlying.clusterSetSlotMigrating(slot, nodeId)).toFuture.isOK
-    sat.onSuccess { case result => logger.trace(s"Migrating slot $slot to $nodeId") }
+    sat.onSuccess { case _ => logger.trace(s"Migrating slot $slot to $nodeId") }
     sat.onFailure { case e => logger.trace(s"Failed to migrate slot $slot to $nodeId", e) }
     sat
   }
 
   def clusterSetSlotImporting(slot: Int, nodeId: String): Future[Unit] = {
     val sat = Try(underlying.clusterSetSlotImporting(slot, nodeId)).toFuture.isOK
-    sat.onSuccess { case result => logger.trace(s"Importing slot $slot from $nodeId") }
+    sat.onSuccess { case _ => logger.trace(s"Importing slot $slot from $nodeId") }
     sat.onFailure { case e => logger.trace(s"Failed to import slot $slot from $nodeId", e) }
     sat
   }
@@ -93,7 +93,7 @@ trait SaladClusterCommands[EK,EV,API] {
 
   def clusterCountKeysInSlot(slot: Int): Future[Long] = {
     val count = Try(underlying.clusterCountKeysInSlot(slot)).toFuture
-    count.onSuccess { case result => logger.trace(s"$count keys in slot $slot") }
+    count.onSuccess { case result => logger.trace(s"$result keys in slot $slot") }
     count.onFailure { case e => logger.trace(s"Failed to count keys in slot $slot", e) }
     count
   }
@@ -101,7 +101,7 @@ trait SaladClusterCommands[EK,EV,API] {
   def clusterReplicate(nodeId: String): Future[Unit] =
     Try(underlying.clusterMyId()).toFuture.flatMap { replicaId =>
       val replicated = Try(underlying.clusterReplicate(nodeId)).toFuture.isOK
-      replicated.onSuccess { case result => logger.info(s"$replicaId replicates $nodeId") }
+      replicated.onSuccess { case _ => logger.info(s"$replicaId replicates $nodeId") }
       replicated.onFailure { case e => logger.warn(s"Failed to set $replicaId to replicate $nodeId", e) }
       replicated
     }
@@ -109,7 +109,7 @@ trait SaladClusterCommands[EK,EV,API] {
   def clusterFailover(force: Boolean): Future[Unit] =
     clusterMyId.flatMap { newMaster =>
       val failover = Try(underlying.clusterFailover(force)).toFuture.isOK
-      failover.onSuccess { case result => logger.info(s"Failover to $newMaster") }
+      failover.onSuccess { case _ => logger.info(s"Failover to $newMaster") }
       failover.onFailure { case e => logger.warn(s"Failed to failover to $newMaster", e) }
       failover
     }
@@ -117,7 +117,7 @@ trait SaladClusterCommands[EK,EV,API] {
   def clusterReset(hard: Boolean): Future[Unit] =
     clusterMyId.flatMap { oldId =>
       val reset = Try(underlying.clusterReset(hard)).toFuture.isOK
-      reset.onSuccess { case result => logger.info(s"Reset node: $oldId") }
+      reset.onSuccess { case _ => logger.info(s"Reset node: $oldId") }
       reset.onFailure { case e => logger.warn(s"Failed to reset node: $oldId", e) }
       reset
     }
