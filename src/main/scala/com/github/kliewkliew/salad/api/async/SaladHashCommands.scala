@@ -4,8 +4,7 @@ import FutureConverters._
 import com.github.kliewkliew.salad.serde.Serde
 import com.lambdaworks.redis.api.async.RedisHashAsyncCommands
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
 /**
@@ -26,7 +25,7 @@ trait SaladHashCommands[EK,EV,API] {
     * @return A Future indicating success.
     */
   def hdel[DK](key: DK, field: DK)
-              (implicit keySerde: Serde[DK,EK])
+              (implicit keySerde: Serde[DK,EK], executionContext: ExecutionContext)
   : Future[Boolean] =
     Try(underlying.hdel(keySerde.serialize(key), keySerde.serialize(field))).toFuture
 
@@ -41,7 +40,8 @@ trait SaladHashCommands[EK,EV,API] {
     * @return A Future containing an Option of the decoded value.
     */
   def hget[DK,DV](key: DK, field: DK)
-                 (implicit keySerde: Serde[DK,EK], valSerde: Serde[DV,EV])
+                 (implicit keySerde: Serde[DK,EK], valSerde: Serde[DV,EV], executionContext: ExecutionContext)
+
   : Future[Option[DV]] =
     Try(underlying.hget(keySerde.serialize(key), keySerde.serialize(field))).toFuture
       .map(value => Option.apply(value)
@@ -61,7 +61,7 @@ trait SaladHashCommands[EK,EV,API] {
     */
   def hset[DK,DV](key: DK, field: DK, value: DV,
                   nx: Boolean = false)
-                 (implicit keySerde: Serde[DK,EK], valSerde: Serde[DV,EV])
+                 (implicit keySerde: Serde[DK,EK], valSerde: Serde[DV,EV], executionContext: ExecutionContext)
   : Future[Boolean] =
     Try(
       if (nx)

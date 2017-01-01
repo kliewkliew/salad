@@ -3,8 +3,7 @@ package com.github.kliewkliew.salad.api.async
 import com.lambdaworks.redis.RedisFuture
 
 import scala.compat.java8.FutureConverters._
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.language.implicitConversions
 import scala.util.{Failure, Success, Try}
 
@@ -18,19 +17,31 @@ object FutureConverters {
   implicit def CompletionStageToFuture[J](in: RedisFuture[J]): Future[J] =
     in.toScala
 
-  implicit def RedisFutureJavaBooleanToFutureScalaBoolean(in: RedisFuture[java.lang.Boolean]): Future[Boolean] =
+  implicit def RedisFutureJavaBooleanToFutureScalaBoolean(in: RedisFuture[java.lang.Boolean])
+                                                         (implicit executionContext: ExecutionContext)
+  : Future[Boolean] =
     in.toScala
-  implicit def FutureJavaBooleanToFutureScalaBoolean(in: Future[java.lang.Boolean]): Future[Boolean] =
+  implicit def FutureJavaBooleanToFutureScalaBoolean(in: Future[java.lang.Boolean])
+                                                    (implicit executionContext: ExecutionContext)
+  : Future[Boolean] =
     in.map(_ == true)
 
-  implicit def RedisFutureJavaLongToFutureScalaBoolean(in: RedisFuture[java.lang.Long]): Future[Boolean] =
+  implicit def RedisFutureJavaLongToFutureScalaBoolean(in: RedisFuture[java.lang.Long])
+                                                      (implicit executionContext: ExecutionContext)
+  : Future[Boolean] =
     in.toScala
-  implicit def FutureJavaLongToFutureScalaBoolean(in: Future[java.lang.Long]): Future[Boolean] =
+  implicit def FutureJavaLongToFutureScalaBoolean(in: Future[java.lang.Long])
+                                                 (implicit executionContext: ExecutionContext)
+  : Future[Boolean] =
     in.map(_ == 1)
 
-  implicit def RedisFutureJavaLongToFutureScalaLong(in: RedisFuture[java.lang.Long]): Future[Long] =
+  implicit def RedisFutureJavaLongToFutureScalaLong(in: RedisFuture[java.lang.Long])
+                                                   (implicit executionContext: ExecutionContext)
+  : Future[Long] =
     in.toScala
-  implicit def FutureJavaLongToFutureScalaLong(in: Future[java.lang.Long]): Future[Long] =
+  implicit def FutureJavaLongToFutureScalaLong(in: Future[java.lang.Long])
+                                              (implicit executionContext: ExecutionContext)
+  : Future[Long] =
     in.map(_.toLong)
 
   /**
@@ -50,7 +61,8 @@ object FutureConverters {
   // For simple-string-reply, we get either success or an exception
   // which maps to either Future.success or Future.failed
   implicit class FutureStringToFutureUnit(in: Future[String]) {
-    def isOK: Future[Unit] = in.map {
+    def isOK(implicit executionContext: ExecutionContext)
+    : Future[Unit] = in.map {
       case "OK" => Future.successful(Unit)
       case err => Future.failed(new Exception(err))
     }

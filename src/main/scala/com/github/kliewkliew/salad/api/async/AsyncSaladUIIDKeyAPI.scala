@@ -4,7 +4,7 @@ import com.github.kliewkliew.salad.serde.Serde
 import com.lambdaworks.redis.api.async._
 import com.lambdaworks.redis.cluster.api.async.RedisClusterAsyncCommands
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 /**
   * Wrap the lettuce API to provide an idiomatic Scala API.
@@ -24,46 +24,51 @@ case class AsyncSaladUIIDKeyAPI[API]
   import com.github.kliewkliew.salad.serde.ByteArraySerdes.stringSerde
 
   def del(key: String)
+         (implicit executionContext: ExecutionContext)
   : Future[Boolean] =
     api.del(key)
 
   def expire(key: String, ex: Long)
+            (implicit executionContext: ExecutionContext)
   : Future[Boolean] =
     api.expire(key, ex)
 
   def pexpire(key: String, px: Long)
+             (implicit executionContext: ExecutionContext)
   : Future[Boolean] =
     api.pexpire(key, px)
 
   def persist(key: String)
+             (implicit executionContext: ExecutionContext)
   : Future[Boolean] =
     api.persist(key)
 
   def get[DV](key: String)
-             (implicit valSerde: Serde[DV,Array[Byte]])
+             (implicit valSerde: Serde[DV,Array[Byte]], executionContext: ExecutionContext)
   : Future[Option[DV]] =
-    api.get(key)(stringSerde, valSerde)
+    api.get(key)(stringSerde, valSerde, executionContext)
 
   def set[DV](key: String, value: DV,
               ex: Option[Long] = None, px: Option[Long] = None,
               nx: Boolean = false, xx: Boolean = false)
-             (implicit valSerde: Serde[DV,Array[Byte]])
+             (implicit valSerde: Serde[DV,Array[Byte]], executionContext: ExecutionContext)
   : Future[Unit] =
-    api.set(key, value, ex, px, nx, xx)(stringSerde, valSerde)
+    api.set(key, value, ex, px, nx, xx)(stringSerde, valSerde, executionContext)
 
   def hdel(key: String, field: String)
+          (implicit executionContext: ExecutionContext)
   : Future[Boolean] =
-    api.hdel(key, field)(stringSerde)
+    api.hdel(key, field)(stringSerde, executionContext)
 
   def hget[DV](key: String, field: String)
-              (implicit valSerde: Serde[DV,Array[Byte]])
+              (implicit valSerde: Serde[DV,Array[Byte]], executionContext: ExecutionContext)
   : Future[Option[DV]] =
-    api.hget(key, field)(stringSerde, valSerde)
+    api.hget(key, field)(stringSerde, valSerde, executionContext)
 
   def hset[DV](key: String, field: String, value: DV,
                nx: Boolean = false)
-              (implicit valSerde: Serde[DV,Array[Byte]])
+              (implicit valSerde: Serde[DV,Array[Byte]], executionContext: ExecutionContext)
   : Future[Boolean] =
-    api.hset(key, field, value, nx)(stringSerde, valSerde)
+    api.hset(key, field, value, nx)(stringSerde, valSerde, executionContext)
 
 }

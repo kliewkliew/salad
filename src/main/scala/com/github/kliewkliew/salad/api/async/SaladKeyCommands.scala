@@ -7,8 +7,7 @@ import com.lambdaworks.redis.api.async.RedisKeyAsyncCommands
 import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConverters._
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
 /**
@@ -30,7 +29,7 @@ trait SaladKeyCommands[EK,EV,API] {
     * @return A Future indicating success.
     */
   def del[DK](key: DK)
-             (implicit keySerde: Serde[DK,EK])
+             (implicit keySerde: Serde[DK,EK], executionContext: ExecutionContext)
   : Future[Boolean] =
     Try(underlying.del(keySerde.serialize(key))).toFuture
 
@@ -43,7 +42,7 @@ trait SaladKeyCommands[EK,EV,API] {
     * @return A Future indicating success.
     */
   def expire[DK](key: DK, ex: Long)
-                (implicit keySerde: Serde[DK,EK])
+                (implicit keySerde: Serde[DK,EK], executionContext: ExecutionContext)
   : Future[Boolean] =
     Try(underlying.expire(keySerde.serialize(key), ex)).toFuture
 
@@ -60,7 +59,8 @@ trait SaladKeyCommands[EK,EV,API] {
     */
   def migrate[DK](redisURI: RedisURI, keys: List[DK], timeout: Long = 5000,
                   copy: Boolean = false, replace: Boolean = false)
-                 (implicit keySerde: Serde[DK,EK])
+                 (implicit keySerde: Serde[DK,EK],
+                  executionContext: ExecutionContext)
   : Future[Unit] = {
     val host = redisURI.getHost
     val port = redisURI.getPort
@@ -85,7 +85,7 @@ trait SaladKeyCommands[EK,EV,API] {
     * @return A Future indicating success.
     */
   def pexpire[DK](key: DK, px: Long)
-                 (implicit keySerde: Serde[DK,EK])
+                 (implicit keySerde: Serde[DK,EK], executionContext: ExecutionContext)
   : Future[Boolean] =
     Try(underlying.pexpire(keySerde.serialize(key), px)).toFuture
 
@@ -97,7 +97,7 @@ trait SaladKeyCommands[EK,EV,API] {
     * @return A Future indicating success.
     */
   def persist[DK](key: DK)
-                 (implicit keySerde: Serde[DK,EK])
+                 (implicit keySerde: Serde[DK,EK], executionContext: ExecutionContext)
   : Future[Boolean] =
     Try(underlying.persist(keySerde.serialize(key))).toFuture
 
