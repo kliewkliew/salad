@@ -72,7 +72,7 @@ trait SaladKeyCommands[EK,EV,API] {
 
     val migrated = Try(underlying.migrate(host, port, db, timeout, args)).toFuture.isOK
     migrated.onSuccess{case _ => logger.trace(s"Migrating to $redisURI keys: $keys")}
-    migrated.onFailure{case e => logger.warn(s"Failed to migrate to $redisURI keys: $keys")}
+    migrated.onFailure{case e => logger.trace(s"Failed to migrate to $redisURI keys: $keys", e)}
     migrated
   }
 

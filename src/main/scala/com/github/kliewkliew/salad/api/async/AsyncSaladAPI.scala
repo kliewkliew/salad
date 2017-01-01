@@ -34,3 +34,4 @@ case class AsyncSaladAPI[EK,EV,API]
   */
 case class SaladClusterAPI[EK,EV](underlying: RedisClusterAsyncCommands[EK,EV])
   extends SaladClusterCommands[EK,EV,RedisClusterAsyncCommands[EK,EV]]
+    with SaladKeyCommands[EK,EV,RedisKeyAsyncCommands[EK,EV]]
