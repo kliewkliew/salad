@@ -55,6 +55,24 @@ trait SaladClusterCommands[EK,EV,API] {
     forgot
   }
 
+  def clusterAddSlot(slot: Int)
+                     (implicit executionContext: ExecutionContext)
+  : Future[Unit] = {
+    val added = Try(underlying.clusterAddSlots(slot)).toFuture.isOK
+    added.onSuccess { case _ => logger.trace(s"Added slot $slot") }
+    added.onFailure { case e => logger.trace(s"Failed to add slot $slot", e) }
+    added
+  }
+
+  def clusterDelSlot(slot: Int)
+                     (implicit executionContext: ExecutionContext)
+  : Future[Unit] = {
+    val added = Try(underlying.clusterDelSlots(slot)).toFuture.isOK
+    added.onSuccess { case _ => logger.trace(s"Deleted slot $slot") }
+    added.onFailure { case e => logger.trace(s"Failed to delete slot $slot", e) }
+    added
+  }
+
   def clusterSetSlotNode(slot: Int, nodeId: String)
                         (implicit executionContext: ExecutionContext)
   : Future[Unit] = {
