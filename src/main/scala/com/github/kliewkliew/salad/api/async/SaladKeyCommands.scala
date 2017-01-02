@@ -63,7 +63,7 @@ trait SaladKeyCommands[EK,EV,API] {
                   executionContext: ExecutionContext)
   : Future[Unit] = {
     val host = redisURI.getHost
-    val port = redisURI.getPort
+    val port = Option.apply(redisURI.getPort).getOrElse(6379)
     val db = Option.apply(redisURI.getDatabase).getOrElse(0)
     val encodedKeys = keys.map(keySerde.serialize).asJava
     val args = MigrateArgs.Builder.keys(encodedKeys)

@@ -39,7 +39,7 @@ trait SaladClusterCommands[EK,EV,API] {
     val met = Try(underlying.clusterMeet(
       InetAddress.getByName(redisURI.getHost).getHostAddress, // Hostname will not work; use the IP address
       redisURI.getPort)).toFuture.isOK
-    met.onSuccess { case _ => logger.info(s"Added node to cluser: $redisURI") }
+    met.onSuccess { case _ => logger.info(s"Added node to cluster: $redisURI") }
     met.onFailure { case e => logger.warn(s"Failed to add node to cluster: $redisURI", e) }
     met
   }
@@ -133,14 +133,14 @@ trait SaladClusterCommands[EK,EV,API] {
   def clusterReplicate(nodeId: String)
                       (implicit executionContext: ExecutionContext)
   : Future[Unit] =
-    Try(underlying.clusterMyId()).toFuture.flatMap { replicaId =>
+    clusterMyId.flatMap { replicaId =>
       val replicated = Try(underlying.clusterReplicate(nodeId)).toFuture.isOK
       replicated.onSuccess { case _ => logger.info(s"$replicaId replicates $nodeId") }
       replicated.onFailure { case e => logger.warn(s"Failed to set $replicaId to replicate $nodeId", e) }
       replicated
     }
 
-  def clusterFailover(force: Boolean)
+  def clusterFailover(force: Boolean = false)
                      (implicit executionContext: ExecutionContext)
   : Future[Unit] =
     clusterMyId.flatMap { newMaster =>
@@ -150,7 +150,7 @@ trait SaladClusterCommands[EK,EV,API] {
       failover
     }
 
-  def clusterReset(hard: Boolean)
+  def clusterReset(hard: Boolean = false)
                   (implicit executionContext: ExecutionContext)
   : Future[Unit] =
     clusterMyId.flatMap { oldId =>
@@ -168,7 +168,7 @@ trait SaladClusterCommands[EK,EV,API] {
     * @return
     */
   def clusterNodes(implicit executionContext: ExecutionContext): Future[mutable.Buffer[RedisClusterNode]] =
-    underlying.clusterNodes.map(ClusterPartitionParser.parse).map(_.getPartitions.asScala)
+    Try(underlying.clusterNodes).toFuture.map(ClusterPartitionParser.parse).map(_.getPartitions.asScala)
   def masterNodes(implicit executionContext: ExecutionContext): Future[mutable.Buffer[RedisClusterNode]] =
     clusterNodes.map(_.filter(Role.MASTER == _.getRole))
   def masterNodes(amongNodes: mutable.Buffer[RedisClusterNode]): mutable.Buffer[RedisClusterNode] =
