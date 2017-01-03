@@ -36,9 +36,10 @@ trait SaladClusterCommands[EK,EV,API] {
   def clusterMeet(redisURI: RedisURI)
                  (implicit executionContext: ExecutionContext)
   : Future[Unit] = {
+    val canonicalURI = canonicalizeURI(redisURI)
     val met = Try(underlying.clusterMeet(
-      InetAddress.getByName(redisURI.getHost).getHostAddress, // Hostname will not work; use the IP address
-      redisURI.getPort)).toFuture.isOK
+      canonicalURI.getHost, // Hostname will not work; use the IP address
+      canonicalURI.getPort)).toFuture.isOK
     met.onSuccess { case _ => logger.info(s"Added node to cluster: $redisURI") }
     met.onFailure { case e => logger.warn(s"Failed to add node to cluster: $redisURI", e) }
     met
@@ -162,6 +163,16 @@ trait SaladClusterCommands[EK,EV,API] {
 
   def clusterMyId: Future[String] =
     Try(underlying.clusterMyId).toFuture
+
+  /**
+    * Redis cluster can resolve ip addresses but it cannot resolve hostnames.
+    * @param redisURI The URI to convert to an ip address resolvable from this node.
+    * @return The canonicalized URI.
+    */
+  def canonicalizeURI(redisURI: RedisURI): RedisURI = {
+    redisURI.setHost(InetAddress.getByName(redisURI.getHost).getHostAddress)
+    redisURI
+  }
 
   /**
     * Get a list of nodes in the cluster.
