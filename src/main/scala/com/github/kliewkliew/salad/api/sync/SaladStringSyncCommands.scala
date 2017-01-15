@@ -44,13 +44,13 @@ trait SaladStringSyncCommands[EK,EV,API] {
     * @param valSerde The serde to encode the value.
     * @tparam DK The unencoded key type.
     * @tparam DV The unencoded value type.
-    * @return A Boolean indicating success.
+    * @return A Try indicating success.
     */
   def set[DK,DV](key: DK, value: DV,
                  ex: Option[Long] = None, px: Option[Long] = None,
                  nx: Boolean = false, xx: Boolean = false)
                 (implicit keySerde: Serde[DK,EK], valSerde: Serde[DV,EV])
-  : Try[Boolean] = {
+  : Try[Unit] = {
     val args = new SetArgs
     ex.map(args.ex)
     px.map(args.px)
