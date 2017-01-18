@@ -50,7 +50,7 @@ case class SyncSaladStringKeyAPI[EK,EV,API]
               ex: Option[Long] = None, px: Option[Long] = None,
               nx: Boolean = false, xx: Boolean = false)
              (implicit keySerde: Serde[String,EK], valSerde: Serde[DV,EV])
-  : Try[Boolean] =
+  : Try[Unit] =
     api.set(key, value, ex, px, nx, xx)
 
   def hdel(key: String, field: String)

@@ -46,7 +46,7 @@ case class SyncSaladUIIDKeyAPI[API]
               ex: Option[Long] = None, px: Option[Long] = None,
               nx: Boolean = false, xx: Boolean = false)
              (implicit valSerde: Serde[DV,Array[Byte]])
-  : Try[Boolean] =
+  : Try[Unit] =
     api.set(key, value, ex, px, nx, xx)(stringSerde, valSerde)
 
   def hdel(key: String, field: String)
