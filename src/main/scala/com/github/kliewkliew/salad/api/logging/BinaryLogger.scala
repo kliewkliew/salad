@@ -11,10 +11,10 @@ class BinaryLogger(namespace: String) {
 }
 
 object LoggerConfig {
-  private val config = ConfigFactory.load().getConfig("salad.logger")
-  val failureLogLevel: String = Option.apply(config.getString("failure"))
+  private val config = Option.apply(ConfigFactory.load().getConfig("salad.logger"))
+  val failureLogLevel: String = config.map(_.getString("failure"))
     .getOrElse("WARN")
-  val successLogLevel: String = Option.apply(config.getString("success"))
+  val successLogLevel: String = config.map(_.getString("success"))
     .getOrElse("DEBUG")
 }
 
