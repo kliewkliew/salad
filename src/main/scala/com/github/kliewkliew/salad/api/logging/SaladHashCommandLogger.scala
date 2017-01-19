@@ -1,5 +1,7 @@
 package com.github.kliewkliew.salad.api.logging
 
+import com.github.kliewkliew.salad.api.logging.SaladStringCommandLogger.success
+
 import scala.util.{Failure, Success, Try}
 
 object SaladHashCommandLogger extends BinaryLogger("SaladHashCommands") {
@@ -17,11 +19,13 @@ object SaladHashCommandLogger extends BinaryLogger("SaladHashCommands") {
   def hget[DK,DV](key: DK, field: DK)
                  (result: Try[Option[DV]]) =
     result match {
-      case Success(value) =>
-        success.log(s"Got key, field, value: $key, $field, ${value.getOrElse("NULL")}")
+      case Success(Some(value)) =>
+        success.log(s"Got key, field, value: $key, $field, $value")
+      case Success(None) =>
+        success.log(s"No value for key, field: $key, $field")
       case Failure(t) =>
         failure.log(
-          s"Failed to get key, field, value: $key, $field", t)
+          s"Failed to get value for key, field: $key, $field", t)
     }
 
   def hset[DK,DV](key: DK, field: DK, value: DV,

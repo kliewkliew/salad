@@ -7,11 +7,13 @@ object SaladStringCommandLogger extends BinaryLogger("SaladStringCommands") {
   def get[DK,DV](key: DK)
                 (result: Try[Option[DV]]) =
     result match {
-      case Success(value) =>
-        success.log(s"Got key value: $key, $value")
+      case Success(Some(value)) =>
+        success.log(s"Got key, value: $key, $value")
+      case Success(None) =>
+        success.log(s"No value for key: $key")
       case Failure(t) =>
         failure.log(
-          s"Failed to get key value: $key", t)
+          s"Failed to get value for key: $key", t)
     }
 
   def set[DK,DV](key: DK, value: DV,
@@ -20,10 +22,10 @@ object SaladStringCommandLogger extends BinaryLogger("SaladStringCommands") {
                 (result: Try[Unit]) =
     result match {
       case Success(_) =>
-        success.log(s"Set key value: $key, $value")
+        success.log(s"Set key, value: $key, $value")
       case Failure(t) =>
         failure.log(
-          s"Failed to set key value: $key, $value", t)
+          s"Failed to set key, value: $key, $value", t)
     }
 
 }
