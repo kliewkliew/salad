@@ -3,6 +3,8 @@ package com.github.kliewkliew.salad.api.logging
 import com.typesafe.config.ConfigFactory
 import org.slf4j.{Logger, LoggerFactory}
 
+import scala.util.Try
+
 class BinaryLogger(namespace: String) {
   private val underlying = LoggerFactory.getLogger(namespace)
   protected val success = new SuccessLogger(underlying)
@@ -11,7 +13,7 @@ class BinaryLogger(namespace: String) {
 }
 
 object LoggerConfig {
-  private val config = Option.apply(ConfigFactory.load().getConfig("salad.logger"))
+  private val config = Try(ConfigFactory.load().getConfig("salad.logger"))
   val failureLogLevel: String = config.map(_.getString("failure"))
     .getOrElse("WARN")
   val successLogLevel: String = config.map(_.getString("success"))

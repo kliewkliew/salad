@@ -88,7 +88,7 @@ String serdes are also provided if you require readable keys/values.
 * StringSerdes
 
 ## Logging
-Salad logs Redis command success and failure to DEBUG and WARN.
+Salad logs Redis command success and failure to `DEBUG` and `WARN`.
 The default log levels can be overriden by setting a configuration file for your app.
 ```
 -Dconfig.file=src/main/resources/application.conf
