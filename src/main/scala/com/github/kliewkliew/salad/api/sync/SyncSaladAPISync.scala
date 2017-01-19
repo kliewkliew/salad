@@ -9,7 +9,7 @@ import com.lambdaworks.redis.api.sync._
   * @tparam EV The value storage encoding.
   * @tparam API The lettuce API to wrap.
   */
-case class SyncSaladAPI[EK,EV,API]
+case class SyncSaladAPISync[EK,EV,API]
 (underlying: API
   with RedisHashCommands[EK,EV]
   with RedisKeyCommands[EK,EV]
@@ -18,6 +18,3 @@ case class SyncSaladAPI[EK,EV,API]
   extends SaladHashSyncCommands[EK,EV,API]
     with SaladKeySyncCommands[EK,EV,API]
     with SaladStringSyncCommands[EK,EV,API]
-{
-  // Nothing
-}

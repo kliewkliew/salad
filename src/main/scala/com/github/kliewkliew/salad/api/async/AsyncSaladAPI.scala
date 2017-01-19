@@ -32,6 +32,6 @@ case class AsyncSaladAPI[EK,EV,API]
   * @tparam EK The key storage encoding.
   * @tparam EV The value storage encoding.
   */
-case class SaladClusterAPI[EK,EV](underlying: RedisClusterAsyncCommands[EK,EV])
+case class AsyncSaladClusterAPI[EK,EV](underlying: RedisClusterAsyncCommands[EK,EV])
   extends SaladClusterCommands[EK,EV,RedisClusterAsyncCommands[EK,EV]]
     with SaladKeyCommands[EK,EV,RedisKeyAsyncCommands[EK,EV]]

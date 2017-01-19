@@ -87,6 +87,23 @@ String serdes are also provided if you require readable keys/values.
 ### StringCodec, Utf8StringCodec
 * StringSerdes
 
+## Logging
+Salad logs Redis command success and failure to DEBUG and WARN.
+The default log levels can be overriden by setting a configuration file for your app.
+```
+-Dconfig.file=src/main/resources/application.conf
+```
+
+ie.
+```
+salad {
+  logger {
+    success = "INFO"
+    failure = "ERROR"
+  }
+}
+```
+
 # SBT
 TODO: publish jars to Maven repo
 

@@ -1,5 +1,7 @@
 package com.github.kliewkliew.salad.api.sync
 
+import com.github.kliewkliew.salad.api.TryConverters._
+import com.github.kliewkliew.salad.api.logging.SaladKeyCommandLogger
 import com.github.kliewkliew.salad.serde.Serde
 import com.lambdaworks.redis.api.sync.RedisKeyCommands
 
@@ -23,8 +25,11 @@ trait SaladKeySyncCommands[EK,EV,API] {
     */
   def del[DK](key: DK)
              (implicit keySerde: Serde[DK,EK])
-  : Try[Boolean] =
-    Try(underlying.del(keySerde.serialize(key))).map(_ == 1)
+  : Try[Boolean] = {
+    val result = Try(underlying.del(keySerde.serialize(key)))
+    SaladKeyCommandLogger.del(key)(result)
+    result
+  }
 
   /**
     * Set a key's TTL in seconds.
@@ -36,8 +41,11 @@ trait SaladKeySyncCommands[EK,EV,API] {
     */
   def expire[DK](key: DK, ex: Long)
                 (implicit keySerde: Serde[DK,EK])
-  : Try[Boolean] =
-    Try(underlying.expire(keySerde.serialize(key), ex))
+  : Try[Boolean] = {
+    val result = Try(underlying.expire(keySerde.serialize(key), ex))
+    SaladKeyCommandLogger.expire(key, ex)(result)
+    result
+  }
 
   /**
     * Set a key's TTL in milliseconds.
@@ -49,8 +57,11 @@ trait SaladKeySyncCommands[EK,EV,API] {
     */
   def pexpire[DK](key: DK, px: Long)
                  (implicit keySerde: Serde[DK,EK])
-  : Try[Boolean] =
-    Try(underlying.pexpire(keySerde.serialize(key), px))
+  : Try[Boolean] = {
+    val result = Try(underlying.pexpire(keySerde.serialize(key), px))
+    SaladKeyCommandLogger.pexpire(key, px)(result)
+    result
+  }
 
   /**
     * Remove the expiry from a key.
@@ -61,7 +72,10 @@ trait SaladKeySyncCommands[EK,EV,API] {
     */
   def persist[DK](key: DK)
                  (implicit keySerde: Serde[DK,EK])
-  : Try[Boolean] =
-    Try(underlying.persist(keySerde.serialize(key)))
+  : Try[Boolean] = {
+    val result = Try(underlying.persist(keySerde.serialize(key)))
+    SaladKeyCommandLogger.persist(key)(result)
+    result
+  }
 
 }

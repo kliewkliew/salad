@@ -1,6 +1,8 @@
 package com.github.kliewkliew.salad.api.sync
 
+import com.github.kliewkliew.salad.api.TryConverters._
 
+import com.github.kliewkliew.salad.api.logging.SaladHashCommandLogger
 import com.github.kliewkliew.salad.serde.Serde
 import com.lambdaworks.redis.api.sync.RedisHashCommands
 
@@ -25,8 +27,11 @@ trait SaladHashSyncCommands[EK,EV,API] {
     */
   def hdel[DK](key: DK, field: DK)
               (implicit keySerde: Serde[DK,EK])
-  : Try[Boolean] =
-    Try(underlying.hdel(keySerde.serialize(key), keySerde.serialize(field))).map(_ == 1)
+  : Try[Boolean] = {
+    val result = Try(underlying.hdel(keySerde.serialize(key), keySerde.serialize(field)))
+    SaladHashCommandLogger.hdel(key, field)(result)
+    result
+  }
 
   /**
     * Get a field-value pair of a hash key.
@@ -40,10 +45,13 @@ trait SaladHashSyncCommands[EK,EV,API] {
     */
   def hget[DK,DV](key: DK, field: DK)
                  (implicit keySerde: Serde[DK,EK], valSerde: Serde[DV,EV])
-  : Try[Option[DV]] =
-    Try(
+  : Try[Option[DV]] = {
+    val result = Try(
       Option.apply(underlying.hget(keySerde.serialize(key), keySerde.serialize(field)))
         .map(valSerde.deserialize))
+    SaladHashCommandLogger.hget(key, field)(result)
+    result
+  }
 
   /**
     * Set a field-value pair for a hash key.
@@ -60,12 +68,15 @@ trait SaladHashSyncCommands[EK,EV,API] {
   def hset[DK,DV](key: DK, field: DK, value: DV,
                   nx: Boolean = false)
                  (implicit keySerde: Serde[DK,EK], valSerde: Serde[DV,EV])
-  : Try[Boolean] =
-    Try(
+  : Try[Boolean] = {
+    val result = Try(
       if (nx)
         underlying.hsetnx(keySerde.serialize(key), keySerde.serialize(field), valSerde.serialize(value))
       else
         underlying.hset(keySerde.serialize(key), keySerde.serialize(field), valSerde.serialize(value))
     )
+    SaladHashCommandLogger.hset(key, field, value, nx)(result)
+    result
+  }
 
 }

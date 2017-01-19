@@ -1,10 +1,12 @@
 package com.github.kliewkliew.salad.api.async
 
 import FutureConverters._
+import com.github.kliewkliew.salad.api.TryConverters._
+
+import com.github.kliewkliew.salad.api.logging.SaladKeyCommandLogger
 import com.github.kliewkliew.salad.serde.Serde
 import com.lambdaworks.redis.{MigrateArgs, RedisURI}
 import com.lambdaworks.redis.api.async.RedisKeyAsyncCommands
-import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConverters._
 import scala.concurrent.{ExecutionContext, Future}
@@ -19,8 +21,6 @@ import scala.util.Try
 trait SaladKeyCommands[EK,EV,API] {
   def underlying: API with RedisKeyAsyncCommands[EK,EV]
 
-  private val logger = LoggerFactory.getLogger(this.getClass)
-
   /**
     * Delete a key-value pair.
     * @param key The key to delete.
@@ -30,8 +30,11 @@ trait SaladKeyCommands[EK,EV,API] {
     */
   def del[DK](key: DK)
              (implicit keySerde: Serde[DK,EK], executionContext: ExecutionContext)
-  : Future[Boolean] =
-    Try(underlying.del(keySerde.serialize(key))).toFuture
+  : Future[Boolean] = {
+    val resultF = Try(underlying.del(keySerde.serialize(key))).toFuture
+    resultF.onComplete(result => SaladKeyCommandLogger.del(key)(result))
+    resultF
+  }
 
   /**
     * Set a key's TTL in seconds.
@@ -43,8 +46,11 @@ trait SaladKeyCommands[EK,EV,API] {
     */
   def expire[DK](key: DK, ex: Long)
                 (implicit keySerde: Serde[DK,EK], executionContext: ExecutionContext)
-  : Future[Boolean] =
-    Try(underlying.expire(keySerde.serialize(key), ex)).toFuture
+  : Future[Boolean] = {
+    val resultF = Try(underlying.expire(keySerde.serialize(key), ex)).toFuture
+    resultF.onComplete(result => SaladKeyCommandLogger.expire(key, ex)(result))
+    resultF
+  }
 
   /**
     * Atomically transfer one or more keys from a Redis instance to another one.
@@ -70,10 +76,9 @@ trait SaladKeyCommands[EK,EV,API] {
     if (copy) args.copy()
     if (replace) args.replace()
 
-    val migrated = Try(underlying.migrate(host, port, db, timeout, args)).toFuture.isOK
-    migrated.onSuccess{case _ => logger.trace(s"Migrating to $redisURI keys: $keys")}
-    migrated.onFailure{case e => logger.trace(s"Failed to migrate to $redisURI keys: $keys", e)}
-    migrated
+    val resultF = Try(underlying.migrate(host, port, db, timeout, args)).toFuture.isOK
+    resultF.onComplete(result => SaladKeyCommandLogger.migrate(redisURI, keys, timeout, copy, replace)(result))
+    resultF
   }
 
   /**
@@ -86,8 +91,11 @@ trait SaladKeyCommands[EK,EV,API] {
     */
   def pexpire[DK](key: DK, px: Long)
                  (implicit keySerde: Serde[DK,EK], executionContext: ExecutionContext)
-  : Future[Boolean] =
-    Try(underlying.pexpire(keySerde.serialize(key), px)).toFuture
+  : Future[Boolean] = {
+    val resultF = Try(underlying.pexpire(keySerde.serialize(key), px)).toFuture
+    resultF.onComplete(result => SaladKeyCommandLogger.pexpire(key, px)(result))
+    resultF
+  }
 
   /**
     * Remove the expiry from a key.
@@ -98,7 +106,10 @@ trait SaladKeyCommands[EK,EV,API] {
     */
   def persist[DK](key: DK)
                  (implicit keySerde: Serde[DK,EK], executionContext: ExecutionContext)
-  : Future[Boolean] =
-    Try(underlying.persist(keySerde.serialize(key))).toFuture
+  : Future[Boolean] = {
+    val resultF = Try(underlying.persist(keySerde.serialize(key))).toFuture
+    resultF.onComplete(result => SaladKeyCommandLogger.persist(key)(result))
+    resultF
+  }
 
 }

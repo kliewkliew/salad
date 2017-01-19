@@ -51,7 +51,7 @@ object FutureConverters {
     */
 
   // Ensure that unchecked exceptions can be mapped over.
-  implicit class TryToFuture[J](in: Try[RedisFuture[J]]) {
+  implicit class EnsureExceptionsMappable[J](in: Try[RedisFuture[J]]) {
     def toFuture: Future[J] = in match {
       case Success(future) => future
       case Failure(t) => Future.failed(t)
@@ -60,7 +60,7 @@ object FutureConverters {
 
   // For simple-string-reply, we get either success or an exception
   // which maps to either Future.success or Future.failed
-  implicit class FutureStringToFutureUnit(in: Future[String]) {
+  implicit class FutureSimpleStringReply(in: Future[String]) {
     def isOK(implicit executionContext: ExecutionContext)
     : Future[Unit] = in.map {
       case "OK" => Future.successful(Unit)

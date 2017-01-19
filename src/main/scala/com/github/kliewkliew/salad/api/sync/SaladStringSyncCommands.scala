@@ -1,10 +1,13 @@
 package com.github.kliewkliew.salad.api.sync
 
+import com.github.kliewkliew.salad.api.TryConverters._
+import com.github.kliewkliew.salad.api.logging.SaladStringCommandLogger
 import com.github.kliewkliew.salad.serde.Serde
 import com.lambdaworks.redis.SetArgs
 import com.lambdaworks.redis.api.sync.RedisStringCommands
+import org.slf4j.LoggerFactory
 
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 /**
   * Wrap the lettuce API to provide an idiomatic Scala API.
@@ -26,10 +29,13 @@ trait SaladStringSyncCommands[EK,EV,API] {
     */
   def get[DK,DV](key: DK)
                 (implicit keySerde: Serde[DK,EK], valSerde: Serde[DV,EV])
-  : Try[Option[DV]] =
-    Try(
+  : Try[Option[DV]] = {
+    val result = Try(
       Option.apply(underlying.get(keySerde.serialize(key)))
         .map(valSerde.deserialize))
+    SaladStringCommandLogger.get(key)(result)
+    result
+  }
 
 
   /**
@@ -57,7 +63,9 @@ trait SaladStringSyncCommands[EK,EV,API] {
     if (nx) args.nx()
     if (xx) args.xx()
 
-    Try(underlying.set(keySerde.serialize(key), valSerde.serialize(value), args)).map(_ == "OK")
+    val result = Try(underlying.set(keySerde.serialize(key), valSerde.serialize(value), args))
+    SaladStringCommandLogger.set(key, value, ex, px, nx, xx)(result)
+    result
   }
 
 }

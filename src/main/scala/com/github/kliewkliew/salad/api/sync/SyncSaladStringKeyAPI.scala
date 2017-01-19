@@ -19,7 +19,7 @@ case class SyncSaladStringKeyAPI[EK,EV,API]
   with RedisKeyCommands[EK,EV]
   with RedisStringCommands[EK,EV]
 ) {
-  val api = SyncSaladAPI(underlying)
+  val api = SyncSaladAPISync(underlying)
 
   def del(key: String)
          (implicit keySerde: Serde[String,EK])

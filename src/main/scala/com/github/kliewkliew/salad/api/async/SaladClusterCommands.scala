@@ -3,6 +3,7 @@ package com.github.kliewkliew.salad.api.async
 import java.net.InetAddress
 
 import FutureConverters._
+import com.github.kliewkliew.salad.api.logging.{FailureLogger, SuccessLogger}
 import com.github.kliewkliew.salad.serde.Serde
 import com.lambdaworks.redis.RedisURI
 import com.lambdaworks.redis.cluster.api.async.RedisClusterAsyncCommands
@@ -24,7 +25,8 @@ import scala.util.Try
   */
 trait SaladClusterCommands[EK,EV,API] {
   def underlying: API with RedisClusterAsyncCommands[EK,EV]
-
+  private val success = new SuccessLogger(LoggerFactory.getLogger(this.getClass))
+  private val failure = new FailureLogger(LoggerFactory.getLogger(this.getClass))
   private val logger = LoggerFactory.getLogger(this.getClass)
 
   /**
@@ -40,8 +42,8 @@ trait SaladClusterCommands[EK,EV,API] {
     val met = Try(underlying.clusterMeet(
       canonicalURI.getHost, // Hostname will not work; use the IP address
       canonicalURI.getPort)).toFuture.isOK
-    met.onSuccess { case _ => logger.info(s"Added node to cluster: $redisURI") }
-    met.onFailure { case e => logger.warn(s"Failed to add node to cluster: $redisURI", e) }
+    met.onSuccess { case _ => success.log(s"Added node to cluster: $redisURI") }
+    met.onFailure { case e => failure.log(s"Failed to add node to cluster: $redisURI", e) }
     met
   }
 
@@ -50,8 +52,8 @@ trait SaladClusterCommands[EK,EV,API] {
   : Future[Unit] = {
     val forgot = Try(underlying.clusterForget(nodeId)).toFuture.isOK
     clusterMyId.map { executorId =>
-      forgot.onSuccess { case _ => logger.info(s"Forgot $nodeId from $executorId") }
-      forgot.onFailure { case e => logger.warn(s"Failed to forget $nodeId from $executorId", e) }
+      forgot.onSuccess { case _ => success.log(s"Forgot $nodeId from $executorId") }
+      forgot.onFailure { case e => failure.log(s"Failed to forget $nodeId from $executorId", e) }
     }
     forgot
   }
@@ -136,8 +138,8 @@ trait SaladClusterCommands[EK,EV,API] {
   : Future[Unit] =
     clusterMyId.flatMap { replicaId =>
       val replicated = Try(underlying.clusterReplicate(nodeId)).toFuture.isOK
-      replicated.onSuccess { case _ => logger.info(s"$replicaId replicates $nodeId") }
-      replicated.onFailure { case e => logger.warn(s"Failed to set $replicaId to replicate $nodeId", e) }
+      replicated.onSuccess { case _ => success.log(s"$replicaId replicates $nodeId") }
+      replicated.onFailure { case e => failure.log(s"Failed to set $replicaId to replicate $nodeId", e) }
       replicated
     }
 
@@ -146,8 +148,8 @@ trait SaladClusterCommands[EK,EV,API] {
   : Future[Unit] =
     clusterMyId.flatMap { newMaster =>
       val failover = Try(underlying.clusterFailover(force)).toFuture.isOK
-      failover.onSuccess { case _ => logger.info(s"Failover to $newMaster") }
-      failover.onFailure { case e => logger.warn(s"Failed to failover to $newMaster", e) }
+      failover.onSuccess { case _ => success.log(s"Failover to $newMaster") }
+      failover.onFailure { case e => failure.log(s"Failed to failover to $newMaster", e) }
       failover
     }
 
@@ -156,8 +158,8 @@ trait SaladClusterCommands[EK,EV,API] {
   : Future[Unit] =
     clusterMyId.flatMap { oldId =>
       val reset = Try(underlying.clusterReset(hard)).toFuture.isOK
-      reset.onSuccess { case _ => logger.info(s"Reset node: $oldId") }
-      reset.onFailure { case e => logger.warn(s"Failed to reset node: $oldId", e) }
+      reset.onSuccess { case _ => success.log(s"Reset node: $oldId") }
+      reset.onFailure { case e => failure.log(s"Failed to reset node: $oldId", e) }
       reset
     }
 

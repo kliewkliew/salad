@@ -1,6 +1,7 @@
 package com.github.kliewkliew.salad.api.async
 
 import FutureConverters._
+import com.github.kliewkliew.salad.api.logging.SaladStringCommandLogger
 import com.github.kliewkliew.salad.serde.Serde
 import com.lambdaworks.redis.SetArgs
 import com.lambdaworks.redis.api.async.RedisStringAsyncCommands
@@ -28,10 +29,13 @@ trait SaladStringCommands[EK,EV,API] {
     */
   def get[DK,DV](key: DK)
                 (implicit keySerde: Serde[DK,EK], valSerde: Serde[DV,EV], executionContext: ExecutionContext)
-  : Future[Option[DV]] =
-    Try(underlying.get(keySerde.serialize(key))).toFuture
+  : Future[Option[DV]] = {
+    val resultF = Try(underlying.get(keySerde.serialize(key))).toFuture
       .map(value => Option.apply(value)
         .map(valSerde.deserialize))
+    resultF.onComplete(result => SaladStringCommandLogger.get(key)(result))
+    resultF
+  }
 
   /**
     * Set a key-value pair.
@@ -58,7 +62,9 @@ trait SaladStringCommands[EK,EV,API] {
     if (nx) args.nx()
     if (xx) args.xx()
 
-    Try(underlying.set(keySerde.serialize(key), valSerde.serialize(value), args)).toFuture.isOK
+    val resultF = Try(underlying.set(keySerde.serialize(key), valSerde.serialize(value), args)).toFuture.isOK
+    resultF.onComplete(result => SaladStringCommandLogger.set(key, value, ex, px, nx, xx)(result))
+    resultF
   }
 
 }
