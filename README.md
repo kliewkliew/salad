@@ -87,6 +87,18 @@ String serdes are also provided if you require readable keys/values.
 ### StringCodec, Utf8StringCodec
 * StringSerdes
 
+## Exception Handling
+To ensure that exceptions are thrown when all Redis nodes go down, set the `DisconnectedBehavior` client option.
+
+ie.
+```
+val client = RedisClient.create()
+client.setDefaultTimeout(connectionTimeout, TimeUnit.MILLISECONDS)
+client.setOptions(ClientOptions.builder()
+  .disconnectedBehavior(DisconnectedBehavior.REJECT_COMMANDS)
+  .build())
+```
+
 ## Logging
 Salad logs Redis command success and failure to `DEBUG` and `WARN`.
 The default log levels can be overriden by setting a configuration file for your app.
