@@ -7,10 +7,11 @@ import com.typesafe.config.ConfigFactory
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 
 object Timeout {
   val default: FiniteDuration =
-    Option.apply(ConfigFactory.load().getConfig("salad"))
+    Try(ConfigFactory.load().getConfig("salad")).toOption
       .map(_.getInt("request-timeout")).getOrElse(1000).milliseconds
 }
 
