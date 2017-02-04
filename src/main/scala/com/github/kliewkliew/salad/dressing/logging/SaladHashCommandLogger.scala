@@ -1,6 +1,4 @@
-package com.github.kliewkliew.salad.api.logging
-
-import com.github.kliewkliew.salad.api.logging.SaladStringCommandLogger.success
+package com.github.kliewkliew.salad.dressing.logging
 
 import scala.util.{Failure, Success, Try}
 

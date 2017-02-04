@@ -3,7 +3,7 @@ package com.github.kliewkliew.salad.api
 import scala.language.implicitConversions
 import scala.util.{Failure, Success, Try}
 
-object TryConverters {
+object ImplicitTryConverters {
 
   implicit def TryJavaBooleanToTryScalaBoolean(in: Try[java.lang.Boolean])
   : Try[Boolean] =

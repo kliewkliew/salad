@@ -1,4 +1,4 @@
-package com.github.kliewkliew.salad.api.logging
+package com.github.kliewkliew.salad.dressing.logging
 
 import com.typesafe.config.ConfigFactory
 import org.slf4j.{Logger, LoggerFactory}

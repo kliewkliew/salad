@@ -1,4 +1,4 @@
-package com.github.kliewkliew.salad.api.async
+package com.github.kliewkliew.salad.api
 
 import com.lambdaworks.redis.RedisFuture
 
@@ -7,7 +7,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.language.implicitConversions
 import scala.util.{Failure, Success, Try}
 
-object FutureConverters {
+object ImplicitFutureConverters {
 
   /**
     * Implicitly convert Future Java types into Future Scala types.

@@ -1,9 +1,9 @@
-package com.github.kliewkliew.salad.api.async
+package com.github.kliewkliew.salad.api
 
 import java.net.InetAddress
 
-import FutureConverters._
-import com.github.kliewkliew.salad.api.logging.{FailureLogger, SuccessLogger}
+import ImplicitFutureConverters._
+import com.github.kliewkliew.salad.dressing.logging.{FailureLogger, SuccessLogger}
 import com.github.kliewkliew.salad.serde.Serde
 import com.lambdaworks.redis.RedisURI
 import com.lambdaworks.redis.cluster.api.async.RedisClusterAsyncCommands

@@ -1,41 +1,29 @@
-package com.github.kliewkliew.salad.api.async
+package com.github.kliewkliew.salad.api
 
-import FutureConverters._
-import com.github.kliewkliew.salad.api.logging.SaladStringCommandLogger
 import com.github.kliewkliew.salad.serde.Serde
-import com.lambdaworks.redis.SetArgs
-import com.lambdaworks.redis.api.async.RedisStringAsyncCommands
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
 
 /**
-  * Wrap the lettuce API to provide an idiomatic Scala API.
+  * Interface with Redis key-value data structures.
   * @tparam EK The key storage encoding.
   * @tparam EV The value storage encoding.
   * @tparam API The lettuce API to wrap.
   */
 trait SaladStringCommands[EK,EV,API] {
-  def underlying: API with RedisStringAsyncCommands[EK,EV]
-
   /**
     * Get a key-value.
     * @param key The key for which to get the value.
     * @param keySerde The serde to encode the key.
     * @param valSerde The serde to decode the returned value.
+    * @param executionContext The thread dispatcher.
     * @tparam DK The unencoded key type.
     * @tparam DV The decoded value type.
     * @return A Future containing an Option of the decoded value.
     */
   def get[DK,DV](key: DK)
                 (implicit keySerde: Serde[DK,EK], valSerde: Serde[DV,EV], executionContext: ExecutionContext)
-  : Future[Option[DV]] = {
-    val resultF = Try(underlying.get(keySerde.serialize(key))).toFuture
-      .map(value => Option.apply(value)
-        .map(valSerde.deserialize))
-    resultF.onComplete(result => SaladStringCommandLogger.get(key)(result))
-    resultF
-  }
+  : Future[Option[DV]]
 
   /**
     * Set a key-value pair.
@@ -47,6 +35,7 @@ trait SaladStringCommands[EK,EV,API] {
     * @param xx Only set the key if it already exist.
     * @param keySerde The serde to encode the key.
     * @param valSerde The serde to encode the value.
+    * @param executionContext The thread dispatcher.
     * @tparam DK The unencoded key type.
     * @tparam DV The unencoded value type.
     * @return A Future indicating success.
@@ -55,16 +44,6 @@ trait SaladStringCommands[EK,EV,API] {
                  ex: Option[Long] = None, px: Option[Long] = None,
                  nx: Boolean = false, xx: Boolean = false)
                 (implicit keySerde: Serde[DK,EK], valSerde: Serde[DV,EV], executionContext: ExecutionContext)
-  : Future[Unit] = {
-    val args = new SetArgs
-    ex.map(args.ex)
-    px.map(args.px)
-    if (nx) args.nx()
-    if (xx) args.xx()
-
-    val resultF = Try(underlying.set(keySerde.serialize(key), valSerde.serialize(value), args)).toFuture.isOK
-    resultF.onComplete(result => SaladStringCommandLogger.set(key, value, ex, px, nx, xx)(result))
-    resultF
-  }
+  : Future[Unit]
 
 }

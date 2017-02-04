@@ -8,10 +8,11 @@ Single-node Redis, master-slave Sentinel configurations, and sharded Redis Clust
 Notably, this is the first Scala client to support Redis Cluster *and* provide an asynchronous API together in one package.
 
 Salad also ensures that all exceptions thrown by lettuce can be mapped over in Scala futures.
-If you used lettuce directly, exceptions in lettuce would not trigger `Future.failed` in Scala.
+If you used lettuce directly, exceptions in lettuce might not trigger `Future.failed` in Scala.
 
 # Usage
-There are wrappers for the both the asynchronous and synchronous API.
+`SaladAPI` is the base wrapper around the lettuce API.
+It can be decorated with various wrappers that add additional functionality.
 
 ## Instantiate Lettuce API
 ```
@@ -23,17 +24,22 @@ val lettuceAPI = client.connect(ByteArrayCodec.INSTANCE).async
 If the key can be a string, byte-array, or a numeric type:
 ```
 import redis.serde.SnappySerdes._
-val saladAPI = AsyncSaladAPI(lettuceAPI)
+val saladAPI =
+  new SaladAPI(lettuceAPI)
 ```
 If the unencoded key will always be a (compressable) string and the value can be any type:
 ```
 import redis.serde.SnappySerdes._
-val saladAPI = AsyncSaladStringKeyAPI(lettuceAPI)
+val saladAPI =
+  new SaladStringKeyAPI(
+    new SaladAPI(lettuceAPI))
 ```
 If the unencoded key will always be an uncompressable string and the value can be any type:
 ```
 import redis.serde.SnappySerdes._
-val saladAPI = AsyncSaladUIIDKeyAPI(lettuceAPI)
+val saladAPI =
+  new SaladUIIDKeyAPI(
+    new SaladAPI(lettuceAPI))
 ```
 
 If the strings and byte-array values are not compressible while using SaladStringKeyAPI or SaladUIIDKeyAPI, import `CompactByteArraySerdes` to only compact numeric types.
@@ -87,20 +93,29 @@ String serdes are also provided if you require readable keys/values.
 ### StringCodec, Utf8StringCodec
 * StringSerdes
 
-## Exception Handling
-To ensure that exceptions are thrown when all Redis nodes go down, set the `DisconnectedBehavior` client option.
-
-ie.
+## Decorators
+### Exception Handling
+To ensure that exceptions are thrown when all Redis nodes go down, use the `SaladTimeoutAPI` decorator.
 ```
-val client = RedisClient.create()
-client.setDefaultTimeout(connectionTimeout, TimeUnit.MILLISECONDS)
-client.setOptions(ClientOptions.builder()
-  .disconnectedBehavior(DisconnectedBehavior.REJECT_COMMANDS)
-  .build())
+val saladAPI =
+  new SaladUIIDKeyAPI(
+    new SaladTimeoutAPI(
+      new SaladAPI(lettuceAPI),
+      500.milliseconds))
 ```
 
-## Logging
-Salad logs Redis command success and failure to `DEBUG` and `WARN`.
+### Logging
+To log commands to `sl4j`, use the `SaladLoggingAPI` decorator.
+```
+import scala.concurrent.duration._
+val saladAPI =
+  new SaladUIIDKeyAPI(
+    new SaladLoggingAPI(
+      new SaladTimeoutAPI(
+        new SaladAPI(lettuceAPI),
+        500.milliseconds)))
+```
+By default: success and failure are logged to `DEBUG` and `WARN`.
 The default log levels can be overriden by setting a configuration file for your app.
 ```
 -Dconfig.file=src/main/resources/application.conf
