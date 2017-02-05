@@ -1,5 +1,7 @@
 package com.github.kliewkliew.salad.dressing
 
+import akka.actor.ActorSystem
+import akka.pattern.after
 import com.github.kliewkliew.salad.api.{SaladHashCommands, SaladKeyCommands, SaladStringCommands}
 import com.github.kliewkliew.salad.serde.Serde
 import com.lambdaworks.redis.RedisURI
@@ -36,6 +38,8 @@ class SaladTimeoutAPI[EK,EV,SALAD,LETTUCE]
     with SaladKeyCommands[EK,EV,LETTUCE]
     with SaladStringCommands[EK,EV,LETTUCE] {
 
+  val actorSystem = ActorSystem("SaladTimeoutAPI")
+
   /**
     * Race a request against a timer.
     * @param request The Redis request.
@@ -47,11 +51,11 @@ class SaladTimeoutAPI[EK,EV,SALAD,LETTUCE]
   private def timedRequest[T](request: Future[T])
                              (implicit executionContext: ExecutionContext)
   : Future[T] = {
-    val timer: Future[T] = Future {
-      Thread.sleep(Timeout.default.toMillis)
-      throw new Exception("Request timed out")
-    }.flatMap(_ => request)
-    Future.firstCompletedOf(List(request, timer))
+    val timer =
+      after(Timeout.default, actorSystem.scheduler)
+      { Future.failed(new Exception("Request timed out")) }
+        .flatMap(_ => request)
+    Future.firstCompletedOf(Seq(request, timer))
   }
 
   def hdel[DK](key: DK, field: DK)

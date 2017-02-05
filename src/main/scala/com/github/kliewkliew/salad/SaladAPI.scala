@@ -25,8 +25,6 @@ class SaladAPI[EK,EV,API]
 /**
   * Wrap the lettuce cluster-administration API to provide an idiomatic Scala API.
   *
-  * @example def getConnection(redisURI: RedisURI): Try[SaladClusterAPI[String,String]] =
-  *          Try(saladAPI.underlying.getConnection(redisURI.getHost, redisURI.getPort)).map(SaladClusterAPI(_))
   * @param underlying The lettuce async API to be wrapped.
   * @tparam EK The key storage encoding.
   * @tparam EV The value storage encoding.
