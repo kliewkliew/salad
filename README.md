@@ -133,7 +133,7 @@ The default log levels can be overriden in the configuration file.
 ie.
 ```
 salad {
-  logger {
+  logging {
     success = "INFO"
     failure = "ERROR"
   }
