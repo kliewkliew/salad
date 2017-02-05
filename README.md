@@ -94,14 +94,26 @@ String serdes are also provided if you require readable keys/values.
 * StringSerdes
 
 ## Decorators
+### Configuration
+Decorators are configurable by setting a configuration file for the app.
+```
+-Dconfig.file=src/main/resources/application.conf
+```
 ### Exception Handling
 To ensure that exceptions are thrown when all Redis nodes go down, use the `SaladTimeoutAPI` decorator.
 ```
+import scala.concurrent.duration._
 val saladAPI =
   new SaladUIIDKeyAPI(
     new SaladTimeoutAPI(
       new SaladAPI(lettuceAPI),
       500.milliseconds))
+```
+If you omit the timeout duration parameter, you can specify the timeout (milliseconds) in your configuration file.
+
+ie.
+```
+salad.request-timeout = 200
 ```
 
 ### Logging
@@ -116,10 +128,7 @@ val saladAPI =
         500.milliseconds)))
 ```
 By default: success and failure are logged to `DEBUG` and `WARN`.
-The default log levels can be overriden by setting a configuration file for your app.
-```
--Dconfig.file=src/main/resources/application.conf
-```
+The default log levels can be overriden in the configuration file.
 
 ie.
 ```
